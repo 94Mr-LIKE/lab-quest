@@ -171,6 +171,7 @@
       if (ev.type === 'note') say(ev.text, ev.kind);
       if (ev.type === 'boil') say('水大量冒泡，沸騰了！讀一讀溫度計。', 'ok');
       if (ev.type === 'stop') {
+        if (window.LabRecords) window.LabRecords.onStop(ev.cat, ev.text);
         $('#stopCat', root).textContent = '這一條在防：' + (CAT_NAME[ev.cat] || ev.cat);
         $('#stopText', root).textContent = ev.text;
         open('#ovStop');
@@ -187,6 +188,7 @@
       if (ev.type === 'pass') {
         var labels = ['達成目標', '全程沒有被老師喊停', '沒有用到多餘或錯誤的道具，也沒有用「指出來」的提示'];
         lastStars = ev.stars.filter(Boolean).length;
+        if (window.LabRecords) window.LabRecords.onPass('J8-' + info.mapNo, lastStars);
         $('#passStars', root).innerHTML = ev.stars.map(function (on) { return '<i class="' + (on ? 'on' : 'off') + '">★</i>'; }).join('');
         $('#passReasons', root).innerHTML = ev.stars.map(function (on, i) { return '<li class="' + (on ? 'ok' : 'no') + '">' + (on ? '✓ ' : '✗ ') + labels[i] + '</li>'; }).join('');
         setTimeout(function () { open('#ovPass'); }, 500);
@@ -249,7 +251,14 @@
         else if (f === 'wall') { if (level.s.thermo) level.setWall(level.s.wall + 0.5 * k); }
         else level.setReading(level.s.reading + k);
       }
-      if (e.target.hasAttribute && e.target.hasAttribute('data-close')) close(e.target.closest('.overlay'));
+      if (e.target.hasAttribute && e.target.hasAttribute('data-close')) {
+        var ov = e.target.closest('.overlay');
+        close(ov);
+        if (ov && ov.id === 'ovIntro') {            // 按「我知道了」＝開始玩這一關：記遊玩次數、送一次計數（每台裝置只送一次）
+          if (window.LabRecords) window.LabRecords.markPlay();
+          if (window.LabCounter) window.LabCounter.reportOnce();
+        }
+      }
     });
     $('#btnPause', root).addEventListener('click', function () { level.togglePause(); });
     $('#btnZoom', root).addEventListener('click', function () {
@@ -283,6 +292,7 @@
     // 測試與截圖用：網址加 ?demo=boil 直接跳到沸騰中的畫面
     var m = /[?&]demo=(\w+)/.exec(location.search);
     if (m) {
+      window.LAB_NO_RECORD = true;                   // 截圖示範模式不寫玩家紀錄
       close($('#ovIntro', root));
       level.useItem('beaker'); level.useItem('thermo'); level.setDepth(2.5); level.setWall(3);
       level.useItem('goggles'); level.useItem('lamp'); level.useItem('igniter');

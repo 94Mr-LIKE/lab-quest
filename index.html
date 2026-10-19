@@ -12,14 +12,20 @@
   a.go { display: block; margin: 18px 0; padding: 18px 20px; border-radius: 18px; background: #16324a; color: #fff; text-decoration: none; font-size: 20px; font-weight: 700; text-align: center; }
   a.go:focus-visible { outline: 3px solid #e2762b; outline-offset: 3px; }
   .note { font-size: 15px; color: #4f5866; }
+  .count { font-size: 18px; font-weight: 700; color: #16324a; }
+  a.go2 { display: block; margin: 0 0 18px; padding: 14px 20px; border-radius: 18px; border: 2px solid #16324a; color: #16324a; text-decoration: none; font-size: 18px; font-weight: 700; text-align: center; }
 </style>
 </head>
 <body>
 <main>
   <h1>實驗闖關</h1>
   <p>國小到高中的自然科實驗闖關遊戲，正在開發中。</p>
+  <p class="count" id="playerCount" hidden></p>
   <a class="go" href="prototype/">試玩原型</a>
+  <a class="go2" href="prototype/records.html">我的紀錄</a>
   <p class="note">這是電腦裡的模擬實驗室。真的要做實驗時，一定要在學校實驗室、有老師在旁邊才可以做。本網站不收集任何個人資料。</p>
 </main>
+<script src="prototype/common/counter.js"></script>
+<script>window.LabCounter.show(document.getElementById("playerCount"));</script>
 </body>
 </html>

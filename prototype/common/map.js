@@ -20,6 +20,9 @@
   var doneUpTo = D.proto - 1, protoStars = 0;
   var m = /[?&]done=(\d+)&stars=(\d)/.exec(q);
   if (m && +m[1] === D.proto) { doneUpTo = D.proto; protoStars = +m[2]; }
+  // 玩家紀錄裡有過關紀錄的話，用最佳星數
+  var rec = window.LabRecords && window.LabRecords.load().levels['J8-' + D.proto];
+  if (rec && rec.best) { doneUpTo = D.proto; protoStars = Math.max(protoStars, rec.best); }
   // 示範用的星星（前面的關卡假裝已經玩過）
   function starsOf(n) {
     if (n === D.proto && protoStars) return protoStars;
@@ -73,7 +76,7 @@
     var total = 0;
     for (var t = 1; t <= doneUpTo; t++) total += starsOf(t);
     $('#starTotal').textContent = '★ ' + total + ' / ' + N * 3;
-    $('#progress').textContent = '已過 ' + doneUpTo + ' / ' + N + ' 關';
+    $('#progress').textContent = '已過 ' + doneUpTo + ' / ' + N + ' 關・我的紀錄 ›';
   }
 
   function openSheet(n) {

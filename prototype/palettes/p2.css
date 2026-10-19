@@ -1,0 +1,65 @@
+/* P2「黑板綠」：在教室黑板前做實驗——墨綠黑板、白粉筆寫字、黃粉筆寫數字、紅粉筆喊停 */
+:root {
+  --bg: #1f3b31; --ink: #f3f1ea; --muted: #c8d8cf; --focus: #f4d35e;
+  --card: #284a3d; --card-line: #44695a; --shadow: 0 4px 14px rgba(0, 0, 0, .28);
+  --scene-line: #9fbcae; --scene-bg: #1b342b; --scene-drop: #24493c;
+  --line: #80a595; --btn: #305648; --item: #305648; --item-ink: #f3f1ea;
+  --primary: #f3f1ea; --primary-ink: #1f3b31;
+  --accent: #f4d35e; --accent-soft: rgba(244, 211, 94, .40);
+  --badge: #36604f; --badge-ink: #f3f1ea; --hot: #5b3b1d; --hot-ink: #ffc98f; --boil: #1d4a5e; --boil-ink: #aee0f7; --ok: #1c6a44;
+  --goal-bg: #2e5446; --goal-ink: #f3f1ea; --goal-chip: #f3f1ea; --goal-chip-ink: #1f3b31;
+  --log-bg: #22433a; --ok-bg: #1e5038; --warn-bg: #553a1c; --hint-bg: #23445c; --warn-ink: #ffc47e; --stop: #ffa08e;
+  --out-bg: #1b342b; --star: #ffbf3c; --star-off: #4e7062;
+}
+.lab-svg .table { stroke: #80a595; stroke-width: 4; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #f4d35e; stroke-width: 2; stroke-dasharray: 6 6; opacity: .55; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3; }
+.lab-svg .metal { fill: #93ab9f; }
+.lab-svg .rod { stroke: #93ab9f; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #b3c6bc; stroke-width: 5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #305648; stroke: #b3c6bc; stroke-width: 1.5; }
+.lab-svg .mesh-core { fill: #8c7257; }
+.lab-svg .lamp-body { fill: rgba(205, 235, 250, .16); stroke: #d3e8f2; stroke-width: 2.2; }
+.lab-svg .wick { stroke: #e2e2dc; stroke-width: 2.5; }
+.lab-svg .flame-out { fill: #ffad42; }
+.lab-svg .flame-in { fill: #8fb6ff; }
+.lab-svg .glass { fill: rgba(220, 240, 250, .10); stroke: #eef3ec; stroke-width: 2.6; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #eef3ec; stroke-width: 1.6; }
+.lab-svg .water { fill: #3f8fbf; opacity: .9; }
+.lab-svg .bubbles circle { fill: rgba(255, 255, 255, .88); }
+.lab-svg .ice rect { fill: #e9f8ff; stroke: #a8dcf5; stroke-width: 1.5; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #d5e3da; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 7; opacity: .85; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: rgba(246, 250, 252, .94); stroke: #eef3ec; stroke-width: 1.6; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #e8453c; }
+.lab-svg .chip { fill: #1e5038; stroke: #7fd49a; }
+.lab-svg .chip-t { fill: #c9f2d4; font-size: 15px; font-weight: 700; }
+
+/* 關卡地圖 */
+:root { --path: #f3f1ea; --path-under: #2f5547; --node: #1b342b; --node-ring: #b9ccc1; --node-ink: #f3f1ea; --node-shadow: #0f2019; --lock: #213f34; --lock-ring: #3b5c4f; --lock-shadow: #12251e; --lock-ink: #86a597; }
+.band0 { background: #1f3b31; } .band1 { background: #1c3a37; } .band2 { background: #243a2c; } .band3 { background: #1d3540; } .band4 { background: #2a3b2e; }
+
+/* ===== 以下是這套配色的延伸設定（不影響上面的必備變數；不要可以整段刪掉） ===== */
+
+/* 四科顏色＝四種粉筆色（色相和 P1、P3 一致：生物綠、物理藍、化學紫、地科土黃（深底上偏橘）；配對原則和淺色版相反：生物、化學最淺，物理、地科中等亮度） */
+:root {
+  --subj-bio: #a6ecb8; --subj-phy: #5d88f2; --subj-chem: #ffcaf7; --subj-earth: #f29b1a;
+  --subj-bio-ink: #10241c; --subj-phy-ink: #10241c; --subj-chem-ink: #10241c; --subj-earth-ink: #10241c;
+  --star-ink: #ffbf3c; --star-off-line: #4e7062;
+}
+.map .node.s-bio { --node-ring: var(--subj-bio); --subj-ink: var(--subj-bio-ink); }
+.map .node.s-phy { --node-ring: var(--subj-phy); --subj-ink: var(--subj-phy-ink); }
+.map .node.s-chem { --node-ring: var(--subj-chem); --subj-ink: var(--subj-chem-ink); }
+.map .node.s-earth { --node-ring: var(--subj-earth); --subj-ink: var(--subj-earth-ink); }
+
+/* 科目小字標：不只靠顏色，圈圈右上角再寫「生／理／化／地」 */
+.map .node:not(.lock)::after { position: absolute; right: -11px; top: -11px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--bg); background: var(--node-ring); color: var(--subj-ink, #10241c); font-size: 16px; font-weight: 800; line-height: 1; }
+.map .node.s-bio:not(.lock)::after { content: "生"; }
+.map .node.s-phy:not(.lock)::after { content: "理"; }
+.map .node.s-chem:not(.lock)::after { content: "化"; }
+.map .node.s-earth:not(.lock)::after { content: "地"; }
+
+/* 地圖頂端的星星總數：深底上金色本身就夠清楚 */
+.map-top #starTotal { color: var(--star); }

@@ -1,0 +1,73 @@
+/* P1「白紙黑線」：像寫在方格紙上的實驗紀錄——白紙、黑線、一支螢光筆；顏色只留給有意義的東西（科目、安全、星星、液體與火） */
+:root {
+  --bg: #f1f4f7; --ink: #111820; --muted: #4a5561; --focus: #111820;
+  --card: #ffffff; --card-line: #b3bdc7; --shadow: 0 1px 3px rgba(17, 24, 32, .10);
+  --scene-line: #111820; --scene-bg: #ffffff; --scene-drop: #fff6c2;
+  --line: #7b8691; --btn: #ffffff; --item: #ffffff; --item-ink: #111820;
+  --primary: #111820; --primary-ink: #ffffff;
+  --accent: #111820; --accent-soft: rgba(255, 214, 10, .75);
+  --badge: #e6eaee; --badge-ink: #111820; --hot: #ffe1cc; --hot-ink: #9c3300; --boil: #d9e9fb; --boil-ink: #0a4a94; --ok: #1d7444;
+  --goal-bg: #e6ebf0; --goal-ink: #111820; --goal-chip: #ffe14d; --goal-chip-ink: #111820;
+  --log-bg: #f1f4f7; --ok-bg: #e0f1e6; --warn-bg: #ffefd5; --hint-bg: #e5edfa; --warn-ink: #944400; --stop: #c4221a;
+  --out-bg: #ffffff; --star: #f5b400; --star-off: #edf0f3;
+}
+.lab-svg .table { stroke: #111820; stroke-width: 3; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #111820; stroke-width: 2; stroke-dasharray: 6 6; opacity: .5; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3; }
+.lab-svg .metal { fill: #6a7581; }
+.lab-svg .rod { stroke: #6a7581; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #3f4954; stroke-width: 5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #f3f5f7; stroke: #6a7581; stroke-width: 1.5; }
+.lab-svg .mesh-core { fill: #d9c4a6; }
+.lab-svg .lamp-body { fill: #eef6fb; stroke: #111820; stroke-width: 2.2; }
+.lab-svg .wick { stroke: #2b2b2b; stroke-width: 2.5; }
+.lab-svg .flame-out { fill: #ff9419; stroke: #c25400; stroke-width: 1.2; }
+.lab-svg .flame-in { fill: #2f6fe4; }
+.lab-svg .glass { fill: rgba(205, 228, 242, .30); stroke: #111820; stroke-width: 2.4; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #111820; stroke-width: 1.6; }
+.lab-svg .water { fill: #9fd2f0; }
+.lab-svg .bubbles circle { fill: #fff; stroke: #3d82b0; stroke-width: 1.2; }
+.lab-svg .ice rect { fill: #f4fbff; stroke: #6aa6c8; stroke-width: 1.5; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #8d98a3; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 7; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: #ffffff; stroke: #111820; stroke-width: 1.6; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #d62828; }
+.lab-svg .chip { fill: #e0f1e6; }
+.lab-svg .chip-t { fill: #145c33; font-size: 15px; font-weight: 700; }
+
+/* 關卡地圖 */
+:root { --path: #7b8691; --path-under: #dde3e9; --node: #ffffff; --node-ring: #4a5561; --node-ink: #111820; --node-shadow: rgba(17, 24, 32, .25); --lock: #e7ebef; --lock-ring: #c3ccd5; --lock-shadow: #c3ccd5; --lock-ink: #7b8691; }
+.band0 { background: #f1f4f7; } .band1 { background: #edf5f0; } .band2 { background: #eef1f9; } .band3 { background: #f7f0f3; } .band4 { background: #f3f4ec; }
+
+/* ===== 以下是這套配色的延伸設定（不影響上面的必備變數；不要可以整段刪掉） ===== */
+
+/* 四科顏色（地圖關卡圈的顏色；三套配色的色相一致：生物綠、物理藍、化學紫、地科土黃）
+   深淺刻意拉開：生物、化學最深，物理、地科中等亮度——紅綠色盲看不出紅綠，但看得出深淺
+   --subj-xx-ink 是科目小字標上的字色 */
+:root {
+  --subj-bio: #0f5a24; --subj-phy: #3a88ee; --subj-chem: #8a1c74; --subj-earth: #a7851d;
+  --subj-bio-ink: #ffffff; --subj-phy-ink: #111820; --subj-chem-ink: #ffffff; --subj-earth-ink: #111820;
+  --star-ink: #7a4f00; --star-off-line: #b4bdc6; --grid: #e6ebf0;
+}
+.map .node.s-bio { --node-ring: var(--subj-bio); --subj-ink: var(--subj-bio-ink); }
+.map .node.s-phy { --node-ring: var(--subj-phy); --subj-ink: var(--subj-phy-ink); }
+.map .node.s-chem { --node-ring: var(--subj-chem); --subj-ink: var(--subj-chem-ink); }
+.map .node.s-earth { --node-ring: var(--subj-earth); --subj-ink: var(--subj-earth-ink); }
+
+/* 科目小字標：不只靠顏色，圈圈右上角再寫「生／理／化／地」（色盲也認得出來） */
+.map .node:not(.lock)::after { position: absolute; right: -11px; top: -11px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--node); background: var(--node-ring); color: var(--subj-ink, #fff); font-size: 16px; font-weight: 800; line-height: 1; }
+.map .node.s-bio:not(.lock)::after { content: "生"; }
+.map .node.s-phy:not(.lock)::after { content: "理"; }
+.map .node.s-chem:not(.lock)::after { content: "化"; }
+.map .node.s-earth:not(.lock)::after { content: "地"; }
+
+/* 星星：金色加深色外框（白底上才看得清楚）；沒拿到的星星用淺框 */
+.stars-hud i, .big-stars i, #sheetStars i, .mini-stars { -webkit-text-stroke: 1px var(--star-ink); }
+.stars-hud i:not(.on), .big-stars i:not(.on), #sheetStars i.off, .mini-stars i { -webkit-text-stroke-color: var(--star-off-line); }
+.map-top #starTotal { color: var(--star-ink); }
+
+/* 記憶點：方格紙。實驗桌每一格剛好 1 公分（和畫面比例 1 cm = 9 單位對齊）；地圖也是方格紙 */
+.scene { background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 2.25% 3.1034%; }
+.band { background-image: linear-gradient(rgba(17, 24, 32, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(17, 24, 32, .05) 1px, transparent 1px); background-size: 24px 24px; }

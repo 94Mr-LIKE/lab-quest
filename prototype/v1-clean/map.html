@@ -4,14 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>實驗闖關原型｜關卡地圖</title>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css" id="themeCss">
+<script>
+  /* 配色試看：網址加 ?palette=p1（p1～p4）就換成色彩專家的配色，換頁後會記住；?palette=off 換回原本的 */
+  (function () {
+    var m = /[?&]palette=(p[1-4]|off)/.exec(location.search), p;
+    try { if (m) sessionStorage.setItem("labPalette", m[1]); p = sessionStorage.getItem("labPalette"); } catch (e) { p = m && m[1]; }
+    if (p && p !== "off") document.getElementById("themeCss").href = "../palettes/" + p + ".css";
+  })();
+</script>
 <link rel="stylesheet" href="../common/map.css">
 </head>
 <body class="map-page">
 <header class="map-top">
   <a class="back" href="../index.html" aria-label="回到版本選擇">‹</a>
   <div class="ttl"><span>關卡地圖</span><h1 id="entryTitle">國二</h1></div>
-  <div class="hud"><span id="starTotal"></span><span id="progress"></span></div>
+  <div class="hud"><span id="starTotal"></span><a id="progress" href="../records.html">紀錄</a></div>
 </header>
 <main class="map-wrap"><div class="map" id="map"></div></main>
 <div class="sheet-ov" id="sheet"><div class="lv-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
@@ -20,6 +28,7 @@
   <p id="sheetName"></p><div id="sheetStars"></div><p id="sheetDesc"></p>
   <button type="button" id="sheetGo">開始</button><p id="sheetNote"></p>
 </div></div>
+<script src="../common/records.js"></script>
 <script src="../common/levels_j8.js"></script>
 <script src="../common/map.js"></script>
 </body>

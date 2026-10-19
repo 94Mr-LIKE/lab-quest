@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>實驗闖關｜我的紀錄</title>
+<style>
+  body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: #eef1f4; color: #1d2a36; line-height: 1.6; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
+  .top { display: flex; align-items: center; gap: 8px; }
+  .top a { display: grid; place-items: center; width: 44px; height: 44px; font-size: 30px; text-decoration: none; color: #1d2a36; }
+  h1 { margin: 0; font-size: 24px; }
+  h2 { margin: 22px 0 8px; font-size: 19px; }
+  .sum { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sum div { flex: 1 1 140px; padding: 12px 14px; border-radius: 16px; background: #fff; border: 1.5px solid #d5dce3; }
+  .sum b { display: block; font-size: 26px; }
+  .sum span { color: #4f5866; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid #e3e8ed; text-align: left; font-size: 16px; }
+  th { background: #16324a; color: #fff; font-weight: 600; }
+  .star { color: #b7791f; }
+  .empty { color: #4f5866; }
+  ul { margin: 0; padding-left: 20px; }
+  li { margin: 4px 0; }
+  .cat { display: inline-block; min-width: 28px; margin-right: 6px; padding: 0 8px; border-radius: 10px; background: #fdebd9; text-align: center; }
+  textarea { width: 100%; min-height: 76px; box-sizing: border-box; padding: 10px; border-radius: 12px; border: 1.5px solid #c9d2db; font: 14px/1.4 ui-monospace, Consolas, monospace; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  button { min-height: 48px; padding: 0 18px; border-radius: 14px; border: 1.5px solid #c9d2db; background: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+  button.primary { background: #16324a; color: #fff; border-color: #16324a; }
+  button.danger { color: #b42318; }
+  button:focus-visible, a:focus-visible { outline: 3px solid #e2762b; outline-offset: 2px; }
+  #msg { min-height: 24px; color: #1f6b63; font-weight: 600; }
+  .note { font-size: 14px; color: #4f5866; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><a href="index.html" aria-label="回首頁">‹</a><h1>我的紀錄</h1></div>
+  <p class="note">紀錄只存在這台手機或平板，不會上傳到網路。換裝置時，用最下面的「存檔碼」搬過去。</p>
+
+  <div class="sum">
+    <div><b id="sStars">0</b><span>總星星</span></div>
+    <div><b id="sClears">0</b><span>過關數</span></div>
+    <div><b id="sPlays">0</b><span>開始玩的次數</span></div>
+    <div><b id="sFirst">—</b><span>第一次玩</span></div>
+  </div>
+
+  <h2>各入口進度</h2>
+  <table><thead><tr><th>入口</th><th>過關</th><th>星星</th></tr></thead><tbody id="tEntries"></tbody></table>
+
+  <h2>過關的關卡</h2>
+  <table><thead><tr><th>關卡</th><th>最佳</th><th>過關次數</th></tr></thead><tbody id="tLevels"></tbody></table>
+
+  <h2>被老師喊停、學到的安全守則</h2>
+  <ul id="lRules"></ul>
+
+  <h2>存檔碼</h2>
+  <p class="note">按「產生存檔碼」，把整段複製到新裝置的這一頁，貼上後按「讀入存檔碼」。</p>
+  <textarea id="code" aria-label="存檔碼" placeholder="存檔碼會出現在這裡，或把別台裝置的存檔碼貼在這裡"></textarea>
+  <div class="row">
+    <button class="primary" type="button" id="bExport">產生存檔碼</button>
+    <button type="button" id="bImport">讀入存檔碼</button>
+    <button class="danger" type="button" id="bClear">清除這台裝置的紀錄</button>
+  </div>
+  <p id="msg" role="status"></p>
+</main>
+<script src="common/records.js"></script>
+<script>
+  (function () {
+    'use strict';
+    var R = window.LabRecords;
+    // 入口與關數（老闆 10/19：國小、國一～國三各 50 關，高中基礎、選修各 100 關）
+    var ENTRIES = [['國小', 'E', 50], ['國一', 'J7', 50], ['國二', 'J8', 50], ['國三', 'J9', 50], ['高中基礎', 'SB', 100], ['高中選修', 'SA', 100]];
+    var NAMES = { 'J8-19': '國二 第 19 關　水在幾度沸騰？' };
+    function $(id) { return document.getElementById(id); }
+    function td(text, cls) { var c = document.createElement('td'); c.textContent = text; if (cls) c.className = cls; return c; }
+    function render() {
+      var r = R.load(), stars = 0, clears = 0;
+      Object.keys(r.levels).forEach(function (k) { stars += r.levels[k].best; clears++; });
+      $('sStars').textContent = stars; $('sClears').textContent = clears;
+      $('sPlays').textContent = r.plays; $('sFirst').textContent = r.plays || clears ? r.first : '—';
+      var tb = $('tEntries'); tb.textContent = '';
+      ENTRIES.forEach(function (e) {
+        var c = 0, s = 0;
+        Object.keys(r.levels).forEach(function (k) { if (k.indexOf(e[1] + '-') === 0) { c++; s += r.levels[k].best; } });
+        var tr = document.createElement('tr');
+        tr.appendChild(td(e[0])); tr.appendChild(td(c + ' / ' + e[2])); tr.appendChild(td('★ ' + s + ' / ' + e[2] * 3, 'star'));
+        tb.appendChild(tr);
+      });
+      var tl = $('tLevels'); tl.textContent = '';
+      var keys = Object.keys(r.levels);
+      if (!keys.length) { var tr0 = document.createElement('tr'); var c0 = td('還沒有過關的關卡，去地圖挑一關吧！', 'empty'); c0.colSpan = 3; tr0.appendChild(c0); tl.appendChild(tr0); }
+      keys.forEach(function (k) {
+        var L = r.levels[k], tr = document.createElement('tr');
+        tr.appendChild(td(NAMES[k] || k)); tr.appendChild(td('★★★'.slice(0, L.best) + '☆☆☆'.slice(0, 3 - L.best), 'star')); tr.appendChild(td(L.clears + ' 次'));
+        tl.appendChild(tr);
+      });
+      var ul = $('lRules'); ul.textContent = '';
+      var rk = Object.keys(r.rules);
+      if (!rk.length) { var li0 = document.createElement('li'); li0.textContent = '還沒有被老師喊停過，很棒！'; li0.className = 'empty'; ul.appendChild(li0); }
+      rk.forEach(function (k) {
+        var li = document.createElement('li'), cat = document.createElement('span');
+        cat.className = 'cat'; cat.textContent = r.rules[k].cat;
+        li.appendChild(cat); li.appendChild(document.createTextNode(k + '（' + r.rules[k].n + ' 次）'));
+        ul.appendChild(li);
+      });
+    }
+    $('bExport').addEventListener('click', function () { $('code').value = R.exportCode(); $('code').select(); $('msg').textContent = '存檔碼已產生，請整段複製保存。'; });
+    $('bImport').addEventListener('click', function () {
+      if (R.importCode($('code').value)) { $('msg').textContent = '讀入成功！'; render(); }
+      else $('msg').textContent = '存檔碼格式不對，請確認有整段貼上（開頭是 LAB1-）。原本的紀錄沒有被改動。';
+    });
+    $('bClear').addEventListener('click', function () {
+      if (window.confirm('確定要清除這台裝置的所有紀錄嗎？清除後無法復原。')) { R.clear(); render(); $('msg').textContent = '已清除。'; }
+    });
+    render();
+  })();
+</script>
+</body>
+</html>

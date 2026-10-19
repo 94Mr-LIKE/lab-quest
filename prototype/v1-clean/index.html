@@ -5,13 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cut">
 <title>實驗闖關原型｜版本 1 清爽圖解</title>
 <link rel="stylesheet" href="../common/base.css">
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css" id="themeCss">
+<script>
+  /* 配色試看：網址加 ?palette=p1（p1～p4）就換成色彩專家的配色，換頁後會記住；?palette=off 換回原本的 */
+  (function () {
+    var m = /[?&]palette=(p[1-4]|off)/.exec(location.search), p;
+    try { if (m) sessionStorage.setItem("labPalette", m[1]); p = sessionStorage.getItem("labPalette"); } catch (e) { p = m && m[1]; }
+    if (p && p !== "off") document.getElementById("themeCss").href = "../palettes/" + p + ".css";
+  })();
+</script>
 </head>
 <body>
 <div class="app" id="app"></div>
 <script src="../common/core.js"></script>
 <script src="../common/icons.js"></script>
 <script src="../common/scene-svg.js"></script>
+<script src="../common/records.js"></script>
+<script src="../common/counter.js"></script>
 <script src="../common/ui.js"></script>
 <script>
   new window.LabUI.App(document.getElementById('app'), new window.LabSvgScene(), {});

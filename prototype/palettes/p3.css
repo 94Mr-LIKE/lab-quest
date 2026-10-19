@@ -1,0 +1,72 @@
+/* P3「晴空遊樂場」：像下課的操場一樣亮——晴天藍底、白色卡片、一顆橘子色的大按鈕 */
+:root {
+  --bg: #7cc8f2; --ink: #0f2436; --muted: #2c4458; --focus: #0f2436;
+  --card: #ffffff; --card-line: #d3e9f7; --shadow: 0 4px 0 rgba(16, 70, 112, .16);
+  --scene-line: #ffffff; --scene-bg: #f3faff; --scene-drop: #fff1dc;
+  --line: #6597bd; --btn: #eaf5fd; --item: #eaf5fd; --item-ink: #0f2436;
+  --primary: #ff9a2a; --primary-ink: #1f1300;
+  --accent: #b04a00; --accent-soft: rgba(255, 138, 31, .40);
+  --badge: #e2f0fa; --badge-ink: #0f2436; --hot: #ffe2c7; --hot-ink: #983c00; --boil: #d3ebfb; --boil-ink: #0b4d88; --ok: #1d7a3e;
+  --goal-bg: #eaf6fe; --goal-ink: #0f2436; --goal-chip: #0f2436; --goal-chip-ink: #ffffff;
+  --log-bg: #eef7fd; --ok-bg: #e0f4e5; --warn-bg: #ffecd8; --hint-bg: #e7eefc; --warn-ink: #a1450a; --stop: #c62828;
+  --out-bg: #ffffff; --star: #ffbb1c; --star-off: #f0f5fa;
+}
+.lab-svg .table { stroke: #c9a36a; stroke-width: 4; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #e06d00; stroke-width: 2; stroke-dasharray: 6 6; opacity: .6; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3; }
+.lab-svg .metal { fill: #7d8ea0; }
+.lab-svg .rod { stroke: #7d8ea0; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #56677a; stroke-width: 5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #f2f5f8; stroke: #8e9cab; stroke-width: 1.5; }
+.lab-svg .mesh-core { fill: #e3cba8; }
+.lab-svg .lamp-body { fill: #e8f4fc; stroke: #34506a; stroke-width: 2.2; }
+.lab-svg .wick { stroke: #333333; stroke-width: 2.5; }
+.lab-svg .flame-out { fill: #ff9a1f; stroke: #c25400; stroke-width: 1.2; }
+.lab-svg .flame-in { fill: #3b78ef; }
+.lab-svg .glass { fill: rgba(200, 230, 248, .35); stroke: #2e5675; stroke-width: 2.6; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #2e5675; stroke-width: 1.6; }
+.lab-svg .water { fill: #8fd0f4; }
+.lab-svg .bubbles circle { fill: #fff; stroke: #4f97c4; stroke-width: 1.2; }
+.lab-svg .ice rect { fill: #f4fbff; stroke: #79bde0; stroke-width: 1.5; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #a9b8c6; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 7; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: #ffffff; stroke: #34506a; stroke-width: 1.6; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #d62828; }
+.lab-svg .chip { fill: #e0f4e5; }
+.lab-svg .chip-t { fill: #15602f; font-size: 15px; font-weight: 700; }
+
+/* 關卡地圖 */
+:root { --path: #ffffff; --path-under: #e9c98e; --node: #ffffff; --node-ring: #2c4458; --node-ink: #0f2436; --node-shadow: rgba(15, 36, 54, .35); --lock: #e9f1f7; --lock-ring: #b7cbdb; --lock-shadow: #8eaac0; --lock-ink: #64798c; }
+.band0 { background: #8fd6a2; } .band1 { background: #7cc8f2; } .band2 { background: #f5d48c; } .band3 { background: #f2b9a8; } .band4 { background: #8fd9cf; }
+
+/* ===== 以下是這套配色的延伸設定（不影響上面的必備變數；不要可以整段刪掉） ===== */
+
+/* 四科顏色（色相和 P1、P2 一致：生物綠、物理藍、化學紫、地科土黃）
+   深淺刻意拉開：生物、化學最深，物理、地科中等亮度——紅綠色盲看不出紅綠，但看得出深淺 */
+:root {
+  --subj-bio: #0f5a24; --subj-phy: #3a88ee; --subj-chem: #8a1c74; --subj-earth: #a7851d;
+  --subj-bio-ink: #ffffff; --subj-phy-ink: #111820; --subj-chem-ink: #ffffff; --subj-earth-ink: #111820;
+  --star-ink: #7a4f00; --star-off-line: #8fa7ba;
+}
+.map .node.s-bio { --node-ring: var(--subj-bio); --subj-ink: var(--subj-bio-ink); }
+.map .node.s-phy { --node-ring: var(--subj-phy); --subj-ink: var(--subj-phy-ink); }
+.map .node.s-chem { --node-ring: var(--subj-chem); --subj-ink: var(--subj-chem-ink); }
+.map .node.s-earth { --node-ring: var(--subj-earth); --subj-ink: var(--subj-earth-ink); }
+
+/* 科目小字標：不只靠顏色，圈圈右上角再寫「生／理／化／地」 */
+.map .node:not(.lock)::after { position: absolute; right: -11px; top: -11px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--node); background: var(--node-ring); color: var(--subj-ink, #fff); font-size: 16px; font-weight: 800; line-height: 1; }
+.map .node.s-bio:not(.lock)::after { content: "生"; }
+.map .node.s-phy:not(.lock)::after { content: "理"; }
+.map .node.s-chem:not(.lock)::after { content: "化"; }
+.map .node.s-earth:not(.lock)::after { content: "地"; }
+
+/* 星星：金色加深色外框（藍天和白卡上都看得清楚） */
+.stars-hud i, .big-stars i, #sheetStars i, .mini-stars { -webkit-text-stroke: 1px var(--star-ink); }
+.stars-hud i:not(.on), .big-stars i:not(.on), #sheetStars i.off, .mini-stars i { -webkit-text-stroke-color: var(--star-off-line); }
+.map-top #starTotal { color: var(--star-ink); }
+
+/* 記憶點：糖果按鈕（橘色主按鈕底下一條實心陰影，按下去會沉下去） */
+.btn.primary, #sheetGo { box-shadow: 0 4px 0 #c45f00; }
+.btn.primary:active, #sheetGo:active { transform: translateY(3px); box-shadow: 0 1px 0 #c45f00; }
