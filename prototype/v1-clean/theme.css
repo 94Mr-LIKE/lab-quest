@@ -1,0 +1,42 @@
+/* 版本 1「清爽圖解」：照老闆給的參考圖，奶油色底、白色圓角卡片、深藍主按鈕、平面向量圖 */
+:root {
+  --bg: #f6f1e8; --ink: #1d2a36; --muted: #5d6572; --focus: #e2762b;
+  --card: #fffdf9; --card-line: #ece3d4; --shadow: 0 2px 10px rgba(80, 60, 30, .07);
+  --scene-line: #2f8f9d; --scene-bg: #fffaf2; --scene-drop: #f1f8f6;
+  --line: #e0d6c6; --btn: #fffdf9; --item: #fffdf9; --item-ink: #24425a;
+  --primary: #16324a; --primary-ink: #fff;
+  --accent: #e2762b; --accent-soft: rgba(226, 118, 43, .28);
+  --badge: #f6e7c8; --badge-ink: #7a5212; --hot: #fde2c9; --hot-ink: #a0420c; --boil: #d6eefa; --boil-ink: #0f5d86; --ok: #2c8a5a;
+  --goal-bg: #eef5f3; --goal-ink: #1d2a36; --goal-chip: #2f8f9d; --goal-chip-ink: #fff;
+  --log-bg: #f4efe6; --ok-bg: #e5f3ea; --warn-bg: #fdebd9; --hint-bg: #eaf1fb; --warn-ink: #b4530f; --stop: #c2410c;
+  --out-bg: #fff; --star: #f0a020; --star-off: #e0d8ca;
+}
+.lab-svg .table { stroke: #cdb998; stroke-width: 4; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #2f8f9d; stroke-width: 2; stroke-dasharray: 6 6; opacity: .55; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3; }
+.lab-svg .metal { fill: #8b97a4; }
+.lab-svg .rod { stroke: #8b97a4; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #66727f; stroke-width: 5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #f3f2ee; stroke: #9aa3ab; stroke-width: 1.5; }
+.lab-svg .mesh-core { fill: #e7d5bd; }
+.lab-svg .lamp-body { fill: #e9f2f7; stroke: #4b5b6b; stroke-width: 2.2; }
+.lab-svg .wick { stroke: #3b3b3b; stroke-width: 2.5; }
+.lab-svg .flame-out { fill: #f7a83e; }
+.lab-svg .flame-in { fill: #5b8ff5; }
+.lab-svg .glass { fill: rgba(214, 236, 246, .35); stroke: #44657c; stroke-width: 2.6; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #44657c; stroke-width: 1.6; }
+.lab-svg .water { fill: #a6d8ee; }
+.lab-svg .bubbles circle { fill: #fff; stroke: #6aa7c5; stroke-width: 1.2; }
+.lab-svg .ice rect { fill: #f2fbff; stroke: #8fc5d8; stroke-width: 1.5; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #b7c2cb; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 7; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: #fbfdff; stroke: #4b5b6b; stroke-width: 1.6; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #d64545; }
+.lab-svg .chip { fill: #e3f2ef; }
+.lab-svg .chip-t { fill: #1f6b63; font-size: 15px; font-weight: 700; }
+
+/* 關卡地圖 */
+:root { --path: #ffffff; --path-under: #e6d6bb; --node: #ffffff; --node-ring: #9aa3ab; --node-ink: #16324a; --node-shadow: rgba(80, 60, 30, .25); --lock: #ece6dc; --lock-ring: #d8cfc0; --lock-shadow: #cfc4b2; --lock-ink: #a99e8c; }
+.band0 { background: #f3ecdf; } .band1 { background: #eef3ec; } .band2 { background: #eef0f6; } .band3 { background: #f6eeea; } .band4 { background: #eef4f4; }

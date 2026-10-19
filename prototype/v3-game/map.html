@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>實驗闖關原型｜關卡地圖</title>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="../common/map.css">
+</head>
+<body class="map-page">
+<header class="map-top">
+  <a class="back" href="../index.html" aria-label="回到版本選擇">‹</a>
+  <div class="ttl"><span>關卡地圖</span><h1 id="entryTitle">國二</h1></div>
+  <div class="hud"><span id="starTotal"></span><span id="progress"></span></div>
+</header>
+<main class="map-wrap"><div class="map" id="map"></div></main>
+<div class="sheet-ov" id="sheet"><div class="lv-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <button type="button" id="sheetClose" aria-label="關閉">×</button>
+  <h2 id="sheetTitle"></h2><span class="chip" id="sheetSubj"></span>
+  <p id="sheetName"></p><div id="sheetStars"></div><p id="sheetDesc"></p>
+  <button type="button" id="sheetGo">開始</button><p id="sheetNote"></p>
+</div></div>
+<script src="../common/levels_j8.js"></script>
+<script src="../common/map.js"></script>
+</body>
+</html>

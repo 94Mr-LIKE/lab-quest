@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cut">
+<title>實驗闖關原型｜版本 2 立體實驗桌</title>
+<link rel="stylesheet" href="../common/base.css">
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="app" id="app"></div>
+<noscript>這個版本需要開啟 JavaScript，並用本機網頁伺服器開啟（見「開啟原型.bat」）。</noscript>
+<script src="../common/core.js"></script>
+<script src="../common/icons.js"></script>
+<script src="../common/ui.js"></script>
+<script type="module">
+  import { Scene3D } from './scene-3d.js';
+  new window.LabUI.App(document.getElementById('app'), new Scene3D(), {});
+</script>
+</body>
+</html>

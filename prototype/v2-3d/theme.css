@@ -1,0 +1,23 @@
+/* 版本 2「立體實驗桌」：冷色系實驗室（白、灰藍、青綠），實驗桌是可以拖曳轉動的 3D 畫面 */
+:root {
+  --bg: #e9eff3; --ink: #18232d; --muted: #5d6b78; --focus: #0e9f8f;
+  --card: #ffffff; --card-line: #d8e2e9; --shadow: 0 2px 12px rgba(24, 50, 70, .08);
+  --scene-line: #0e9f8f; --scene-bg: #eef3f6; --scene-drop: #e3f5f2;
+  --line: #cfdae2; --btn: #ffffff; --item: #f6f9fb; --item-ink: #1f4a63;
+  --primary: #0e7c86; --primary-ink: #fff;
+  --accent: #0e9f8f; --accent-soft: rgba(14, 159, 143, .3);
+  --badge: #e2eaf0; --badge-ink: #3b4b58; --hot: #fde2c9; --hot-ink: #a0420c; --boil: #d6eefa; --boil-ink: #0f5d86; --ok: #2c8a5a;
+  --goal-bg: #e3f3f1; --goal-ink: #18232d; --goal-chip: #0e7c86; --goal-chip-ink: #fff;
+  --log-bg: #f1f5f8; --ok-bg: #e5f3ea; --warn-bg: #fdebd9; --hint-bg: #e6eefb; --warn-ink: #b4530f; --stop: #c2410c;
+  --out-bg: #fff; --star: #f0a020; --star-off: #d5dde3;
+}
+.card { border-radius: 18px; }
+.btn, .step, .item { border-radius: 12px; }
+.scene { cursor: grab; }
+.scene:active { cursor: grabbing; }
+.scene::after { content: "拖曳畫面可以轉動視角・點兩下回到原位"; position: absolute; right: 10px; bottom: 8px; padding: 2px 10px; border-radius: 10px; background: rgba(255, 255, 255, .8); font-size: 12px; color: #4a5a66; pointer-events: none; }
+.chip3d { position: absolute; left: 10px; top: 10px; padding: 3px 12px; border-radius: 14px; background: #e3f2ef; color: #1f6b63; font-weight: 700; font-size: 14px; pointer-events: none; }
+
+/* 關卡地圖 */
+:root { --path: #ffffff; --path-under: #c8d6df; --node: #ffffff; --node-ring: #8fa3b1; --node-ink: #0e4f57; --node-shadow: rgba(24, 50, 70, .25); --lock: #dfe6eb; --lock-ring: #c9d3da; --lock-shadow: #b7c3cc; --lock-ink: #8d9ba6; }
+.band0 { background: #e6edf1; } .band1 { background: #e3efec; } .band2 { background: #e7e9f3; } .band3 { background: #eeeaf0; } .band4 { background: #e4eef3; }

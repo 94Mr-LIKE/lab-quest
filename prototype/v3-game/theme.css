@@ -1,0 +1,78 @@
+/* 版本 3「闖關遊戲感」：夜間實驗室、深色底、霓虹強調色、老師角色在上方帶路、大顆圓形道具鈕 */
+:root {
+  --bg: #0f1a26; --ink: #eef4fa; --muted: #93a6b8; --focus: #ffd166;
+  --card: #172636; --card-line: #23384d; --shadow: 0 6px 20px rgba(0, 0, 0, .35);
+  --scene-line: #39d3c2; --scene-bg: #0b1520; --scene-drop: #10283a;
+  --line: #2c4660; --btn: #1d3145; --item: #1d3145; --item-ink: #d8f6ff;
+  --primary: #ffd166; --primary-ink: #1b1b1b;
+  --accent: #39d3c2; --accent-soft: rgba(57, 211, 194, .35);
+  --badge: #24384c; --badge-ink: #cfe3f2; --hot: #5a2d16; --hot-ink: #ffb27a; --boil: #123d57; --boil-ink: #8fe0ff; --ok: #2fbf71;
+  --goal-bg: #1d3145; --goal-ink: #eef4fa; --goal-chip: #39d3c2; --goal-chip-ink: #0b1520;
+  --log-bg: #12202e; --ok-bg: #123a2a; --warn-bg: #4a2a12; --hint-bg: #1d2f4a; --warn-ink: #ffb27a; --stop: #ff8a5c;
+  --out-bg: #0b1520; --star: #ffd166; --star-off: #34475a;
+}
+html { background: #0f1a26; }
+body { background: radial-gradient(120% 600px at 50% 0%, #1a2c40 0%, #0f1a26 100%) no-repeat, #0f1a26; }
+.top h1 { font-size: 20px; letter-spacing: .02em; }
+.stars-hud { font-size: 26px; }
+.hint-btn { background: #ffd166; color: #1b1b1b; border-color: #ffd166; }
+
+.goal-mini { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
+.goal-mini b { margin-right: 8px; padding: 2px 10px; border-radius: 10px; background: #39d3c2; color: #0b1520; font-size: 13px; }
+
+/* 老師帶路對話框 */
+.guide { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 12px; }
+.guide-face { flex: none; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: #23384d; border: 2px solid #39d3c2; }
+.guide-text { position: relative; flex: 1; margin: 0; padding: 10px 14px; border-radius: 16px; background: #eef4fa; color: #13202c; font-weight: 600; }
+.guide-text::before { content: ""; position: absolute; left: -8px; top: 16px; border: 8px solid transparent; border-right-color: #eef4fa; border-left: 0; }
+.log { display: none; }
+
+/* 大顆圓形道具鈕 */
+.tray { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.item { min-height: 0; aspect-ratio: 1; border-radius: 50%; border-width: 2px; background: radial-gradient(circle at 35% 30%, #27445e, #172636 70%); }
+.item:not(.used):hover { border-color: #39d3c2; }
+.item .item-name { font-size: 14px; }
+.item.used { opacity: .3; }
+.btn { border-radius: 26px; text-transform: none; }
+.btn.primary { box-shadow: 0 4px 0 #b88a16; }
+.btn.primary:active { transform: translateY(3px); box-shadow: 0 1px 0 #b88a16; }
+.step { border-radius: 50%; }
+.card { border-radius: 26px; }
+.scene-card { box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+.sheet { border: 1.5px solid #2c4660; }
+.kcard { background: #1d3145; }
+
+/* 實驗桌（深色版） */
+.lab-svg .table { stroke: #2c4660; stroke-width: 4; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #39d3c2; stroke-width: 2; stroke-dasharray: 6 6; opacity: .5; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3; filter: url(#glow); }
+.lab-svg .metal { fill: #6f8297; }
+.lab-svg .rod { stroke: #6f8297; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #8aa0b6; stroke-width: 5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #2b3e52; stroke: #8aa0b6; stroke-width: 1.5; }
+.lab-svg .mesh-core { fill: #6b5a48; }
+.lab-svg .lamp-body { fill: rgba(170, 220, 255, .18); stroke: #a9d6f5; stroke-width: 2.2; }
+.lab-svg .wick { stroke: #ddd; stroke-width: 2.5; }
+.lab-svg .flame-g { filter: url(#glow); }
+.lab-svg .flame-out { fill: #ffb347; }
+.lab-svg .flame-in { fill: #7fb2ff; }
+.lab-svg .glass { fill: rgba(150, 210, 255, .10); stroke: #bfe6ff; stroke-width: 2.6; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #bfe6ff; stroke-width: 1.6; }
+.lab-svg .water { fill: #2b8fc4; opacity: .85; }
+.lab-svg .bubbles circle { fill: rgba(255, 255, 255, .85); }
+.lab-svg .ice rect { fill: #e8fbff; stroke: #9fe3ff; stroke-width: 1.5; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #c8dceb; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 7; opacity: .8; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: rgba(240, 250, 255, .9); stroke: #bfe6ff; stroke-width: 1.6; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #ff5a5a; }
+.lab-svg .chip { fill: #123a2a; stroke: #2fbf71; }
+.lab-svg .chip-t { fill: #8ff0b8; font-size: 15px; font-weight: 700; }
+.zoom-svg rect:first-child { fill: #eef4fa; }
+.zoom-wrap { color: #eef4fa; }
+
+/* 關卡地圖 */
+:root { --path: #ffd166; --path-under: #23384d; --node: #1d3145; --node-ring: #5d7a96; --node-ink: #eef4fa; --node-shadow: #0a121b; --lock: #16222f; --lock-ring: #2a3b4d; --lock-shadow: #0a121b; --lock-ink: #4a6075; }
+.band0 { background: #13202d; } .band1 { background: #112530; } .band2 { background: #15202f; } .band3 { background: #1a1f2e; } .band4 { background: #10232b; }
+.map-top { background: #12202e; }
