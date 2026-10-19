@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<title>瘋狂實驗室｜物理實驗台</title>
+<style>
+  body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: #eceef0; color: #13233f; line-height: 1.6; }
+  main { max-width: 760px; margin: 0 auto; padding: 18px 16px 40px; }
+  h1 { margin: 6px 0 2px; font-size: 26px; font-weight: 900; }
+  p { margin: 4px 0 12px; color: #46546b; }
+  a.card { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; margin: 10px 0; padding: 12px 14px; border-radius: 8px; border: 2px solid #13233f; background: #fff; color: inherit; text-decoration: none; }
+  a.card:focus-visible { outline: 3px solid #13233f; outline-offset: 3px; }
+  .no { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 8px; background: #2b4058; color: #fff; font-size: 22px; font-weight: 900; }
+  .t b { display: block; font-size: 17px; }
+  .t span { font-size: 14px; color: #46546b; }
+  .r { text-align: right; font-size: 13px; font-weight: 800; }
+  .r .d { display: inline-block; padding: 1px 8px; border-radius: 5px; border: 1.5px solid #13233f; background: #ff6a55; }
+  .r .s { display: block; margin-top: 4px; font-size: 18px; color: #f5b820; -webkit-text-stroke: .6px #13233f; letter-spacing: .05em; }
+  .back { color: #13233f; font-weight: 800; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../index.html">‹ 原型首頁</a>
+  <h1>物理實驗台</h1>
+  <p>真的物理：球會照拋體、碰撞、滾動、槓桿、空氣阻力來動。器材自己擺、自己轉，次數有限。</p>
+  <div id="list"></div>
+</main>
+<script src="../common/records.js"></script>
+<script src="phy-levels.js"></script>
+<script>
+  (function () {
+    'use strict';
+    var rec = window.LabRecords ? window.LabRecords.load() : { levels: {} };
+    document.getElementById('list').innerHTML = window.PHY_LEVELS.map(function (l) {
+      var best = rec.levels && rec.levels[l.id] ? rec.levels[l.id].best : 0;
+      return '<a class="card" href="phy.html?lv=' + l.no + '"><span class="no">' + l.no + '</span><span class="t"><b>' + l.title + '</b><span>' + l.stage + '</span></span>' +
+        '<span class="r"><span class="d">' + l.diff + '</span><span class="s" aria-label="' + best + ' 顆星">' + '★★★'.slice(0, best) + '<span style="color:#e3e7ee">' + '★★★'.slice(0, 3 - best) + '</span></span></span></a>';
+    }).join('');
+  })();
+</script>
+</body>
+</html>

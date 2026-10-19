@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<title>瘋狂實驗室｜物理實驗台</title>
+<link rel="stylesheet" href="bench.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header class="bar">
+    <a class="back" href="index.html" aria-label="回關卡列表">‹</a>
+    <div class="titles"><span class="stage" id="stage"></span><h1 id="title"></h1></div>
+    <div class="shots" id="shots" aria-label="剩下的次數"></div>
+    <span class="diff" id="diff"></span>
+    <button class="icon-btn" type="button" id="btnSfx" aria-label="音效"></button>
+  </header>
+  <section class="mission" id="mission">
+    <b>任務</b><p id="missionText"></p>
+    <button class="more" type="button" id="btnHow" aria-expanded="false">怎麼操作</button>
+    <p class="how" id="howText" hidden></p>
+  </section>
+  <main class="stage-wrap" id="stageWrap">
+    <canvas id="cv" aria-label="實驗台：可以把器材拖上來、點器材旋轉或調整"></canvas>
+    <div class="toolbar" id="toolbar" hidden></div>
+    <div class="data" id="data" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="rotate-tip" aria-hidden="true">手機橫放，實驗台會大很多</div>
+    <div class="view-btns">
+      <button class="icon-btn" type="button" id="zoomIn" aria-label="放大">＋</button>
+      <button class="icon-btn" type="button" id="zoomOut" aria-label="縮小">－</button>
+      <button class="icon-btn" type="button" id="zoomFit" aria-label="看全部">⤢</button>
+    </div>
+  </main>
+  <nav class="shelf" id="shelf" aria-label="器材櫃：拖到實驗台上"></nav>
+</div>
+<div class="overlay" id="ov"><div class="sheet" id="sheet"></div></div>
+<script src="../common/records.js"></script>
+<script src="../common/sfx.js"></script>
+<script src="physics.js"></script>
+<script src="phy-model.js"></script>
+<script src="phy-levels.js"></script>
+<script src="phy-game.js"></script>
+</body>
+</html>

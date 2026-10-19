@@ -131,8 +131,10 @@
       if (st.ramp && st.ball) { var x = releaseX(st.h); G.ball.setAttribute('cx', x); G.ball.setAttribute('cy', rampY(x) - 6); G.ball.style.display = ''; }
       else G.ball.style.display = 'none';
     }
-    G.ball.setAttribute('class', st.ball === 'pingpong' ? 'ice' : 'tbulb');
-    if (st.ball === 'pingpong') G.ball.setAttribute('fill', '#ffffff'); else G.ball.removeAttribute('fill');
+    // 球的顏色用行內樣式（蓋過配色檔）：鋼珠灰色、乒乓球橘色，都加深色外框，在格子背景上看得清楚
+    G.ball.removeAttribute('class');
+    G.ball.style.fill = st.ball === 'pingpong' ? '#ff8a1e' : '#9aa5b1';
+    G.ball.style.stroke = '#13233f'; G.ball.style.strokeWidth = '2';
     var hOut = shell.$('#out_h'), bOut = shell.$('#out_b');
     hOut.textContent = st.h.toFixed(1) + ' cm'; shell.$('#rng_h').value = st.h;
     shell.$('#out_c').textContent = Math.round(st.curve * 100) + '%（' + (st.curve >= 0.995 ? '出口水平' : st.curve <= 0.005 ? '直的' : '出口往下斜') + '）';
@@ -169,7 +171,7 @@
     if (st.busy || st.passed) return;
     if (!st.ramp) return shell.say('要先放斜面軌道。', 'warn');
     if (!st.ball) return shell.say('要先放一顆球。', 'warn');
-    if (st.friend) { st.fails++; return shell.fail('ball', '危險！落地區有人', '放手前要先確認落地區沒有人。鋼珠飛出去可能打傷同學。請同學退到安全線後再試。'); }
+    if (st.friend) { st.fails++; return shell.fail('ball', '危險！落地區有人', '放手前要先確認落地區沒有人。' + (st.ball === 'pingpong' ? '乒乓球雖然輕，飛出去還是可能打到同學的眼睛' : '鋼珠又重又硬，飛出去可能打傷同學') + '。請同學退到安全線後再試。'); }
     st.tries++; st.busy = true; render(); sfx('ball_roll');
     var h = st.h, Hh = H(), ball = st.ball, cPct = Math.round(st.curve * 100);
     var x = range(h, ball), magnetGrab = st.magnet && ball === 'steel';
