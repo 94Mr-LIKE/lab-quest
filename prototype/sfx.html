@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>瘋狂實驗室｜音效試聽</title>
+<style>
+  body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: #eceef0; color: #13233f; line-height: 1.6; }
+  main { max-width: 720px; margin: 0 auto; padding: 20px 16px 40px; }
+  h1 { font-size: 26px; margin: 8px 0 4px; letter-spacing: .03em; }
+  p { margin: 4px 0 12px; color: #46546b; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 18px; }
+  button { min-height: 48px; padding: 0 18px; border-radius: 8px; border: 2px solid #13233f; background: #fff; color: #13233f; font: inherit; font-weight: 800; letter-spacing: .04em; cursor: pointer; }
+  button.primary { background: #ff6a55; }
+  button:focus-visible { outline: 3px solid #13233f; outline-offset: 3px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 2px solid #13233f; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid #c9d0da; text-align: left; vertical-align: middle; }
+  th { background: #13233f; color: #fff; font-weight: 700; }
+  td.sec { font-variant-numeric: tabular-nums; white-space: nowrap; color: #46546b; }
+  td button { min-height: 44px; padding: 0 14px; }
+  tr.playing td { background: #fff4c2; }
+  .note { font-size: 14px; }
+  a { color: #13233f; }
+</style>
+</head>
+<body>
+<main>
+  <h1>音效試聽</h1>
+  <p>全部用跟主題曲同一套真實樂器音色（管弦樂取樣）或程式合成，沒有用外部音效庫。按「播放」聽單一個，或按「全部依序播放」。</p>
+  <div class="row">
+    <button class="primary" type="button" id="all">全部依序播放</button>
+    <button type="button" id="stop">停止</button>
+    <button type="button" id="mute">音效：開</button>
+  </div>
+  <table>
+    <thead><tr><th>音效</th><th>什麼時候出現</th><th>長度</th><th></th></tr></thead>
+    <tbody id="list"></tbody>
+  </table>
+  <p class="note">手機請先把靜音開關關掉。音效開關記在這台裝置，關掉後遊戲裡也不會出聲。<a href="index.html">回原型首頁</a></p>
+</main>
+<script src="common/sfx.js"></script>
+<script>
+  (function () {
+    'use strict';
+    var LIST = [['ui_tap', '按鈕', '按一般按鈕', 0.35], ['item_pick', '拿道具', '手指按住道具', 0.5], ['item_place', '放上實驗桌', '器材放好', 0.4],
+      ['slider_tick', '拉桿', '拉拉桿、按＋／－', 0.12], ['action', '執行', '按「測定濃度」這類執行鈕', 0.8], ['pass', '過關', '達成任務', 2.6],
+      ['star1', '第 1 顆星', '過關後星星一顆一顆亮', 1.0], ['star2', '第 2 顆星', '過關後星星一顆一顆亮', 1.0], ['star3', '第 3 顆星', '過關後星星一顆一顆亮', 1.1],
+      ['miss', '沒過', '沒打中、濃度不對', 2.2], ['danger', '危險失敗', '強酸飛濺、落地區有人、沒戴防護', 2.6], ['warn', '提醒', '拿到陷阱道具、少了必要器材', 1.0],
+      ['reset', '重來', '按「重來」', 1.0], ['unlock', '解鎖', '存檔讀入成功、之後的下一關打開', 1.4], ['pour', '倒液體', '加水、加酸、倒進容量瓶', 1.1],
+      ['splash', '液體噴濺', '跟「危險失敗」一起出現（強酸飛濺）', 0.77], ['stir', '玻璃棒攪拌', '攪拌', 0.95], ['shake', '搖勻', '蓋上容量瓶搖勻', 0.94],
+      ['bubble', '冒泡', '之後的沸騰、氣體實驗', 1.27], ['ball_roll', '鋼珠滾動', '鋼珠沿斜坡滾下', 0.65], ['ball_land', '落地', '鋼珠掉在地上', 0.3],
+      ['cup_hit', '掉進杯子', '鋼珠掉進目標杯', 0.33]];
+    var S = window.LabSfx, tb = document.getElementById('list'), timers = [];
+    LIST.forEach(function (x) {
+      var tr = document.createElement('tr'), b = document.createElement('button');
+      tr.id = 'r_' + x[0];
+      [x[1], x[2], x[3].toFixed(2) + ' 秒'].forEach(function (t, i) { var td = document.createElement('td'); td.textContent = t; if (i === 2) td.className = 'sec'; tr.appendChild(td); });
+      b.type = 'button'; b.textContent = '播放'; b.setAttribute('aria-label', '播放：' + x[1]);
+      b.addEventListener('click', function () { mark(x[0]); S.play(x[0]); });
+      var td = document.createElement('td'); td.appendChild(b); tr.appendChild(td); tb.appendChild(tr);
+    });
+    function mark(n) { var p = tb.querySelector('.playing'); if (p) p.classList.remove('playing'); var r = document.getElementById('r_' + n); if (r) r.classList.add('playing'); }
+    function stop() { timers.forEach(clearTimeout); timers = []; mark(''); }
+    document.getElementById('all').addEventListener('click', function () {
+      stop(); var t = 0;
+      LIST.forEach(function (x) { timers.push(setTimeout(function () { mark(x[0]); S.play(x[0]); }, t * 1000)); t += x[3] + 0.6; });
+      timers.push(setTimeout(function () { mark(''); }, t * 1000));
+    });
+    document.getElementById('stop').addEventListener('click', stop);
+    var mb = document.getElementById('mute');
+    function showMute(m) { mb.textContent = m ? '音效：關' : '音效：開'; }
+    showMute(S.isMuted()); S.onChange(showMute);
+    mb.addEventListener('click', function () { S.setMuted(!S.isMuted()); });
+  })();
+</script>
+</body>
+</html>

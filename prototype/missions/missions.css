@@ -44,3 +44,7 @@ a.btn.primary { color: var(--primary-ink); }
 @keyframes dzFly { 0% { transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -1)) scale(.2); opacity: 0; } 30% { opacity: 1; } 100% { transform: none; } }
 @keyframes dzJolt { 0% { transform: scale(2.4); opacity: 0; } 60% { transform: scale(.92); opacity: 1; } 100% { transform: none; } }
 @keyframes dzQuake { 0%, 100% { transform: none; } 20% { transform: translate(-7px, 3px); } 40% { transform: translate(7px, -3px); } 60% { transform: translate(-4px, 2px); } 80% { transform: translate(3px, -1px); } }
+
+/* 音效開關（標題列右邊） */
+.top .sfx-btn { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border-radius: 10px; border: 1.5px solid var(--line); background: var(--btn); color: var(--ink); cursor: pointer; }
+.top .sfx-btn[aria-pressed="false"] { color: var(--muted); }

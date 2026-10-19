@@ -12,8 +12,9 @@
 ## 目前狀態：企劃與原型階段
 
 - `prototype/`：原型試玩首頁。
-  - `prototype/missions/`：新玩法「任務目標制」。任務 A 把鋼珠送進杯子（國二物理）、任務 B 配出 2.0 M 鹽酸（高中化學）。
-  - `prototype/cover/`：封面三個方向（網址加 `?v=1`、`?v=2`、`?v=3`），可以播主題曲。
+  - `prototype/missions/`：新玩法「任務目標制」。任務 A 把鋼珠送進杯子（國二物理，可以調放球高度、斜坡彎曲程度、桌高）、任務 B 配出 2.0 M 鹽酸（高中化學）。配色用 P7 科學海報。
+  - `prototype/cover/`：封面（選定第 1 個方向；`?v=2`、`?v=3` 是沒選上的參考），可以播主題曲。
+  - `prototype/sfx.html`：音效試聽。音效檔在 `prototype/sfx/`，遊戲裡用喇叭按鈕開關。
   - `prototype/v1-clean`、`v2-3d`、`v3-game`：舊玩法的三種畫面（國二 50 關地圖、第 19 關）。
   - `prototype/records.html`：我的紀錄（過關數、星星、學到的安全守則、存檔碼），只存在玩家自己的裝置。
 - 正式版開發中：國小、國一、國二、國三各 50 關，高中基礎、高中選修各 100 關。
@@ -45,4 +46,4 @@ python -m http.server 8000
 
 - Three.js r186（MIT 授權）：只有 3D 版本使用，授權全文在 `prototype/v2-3d/lib/LICENSE`。
 - 封面插畫：AI 繪製（GPT），標題文字由程式排版。
-- 主題曲 `prototype/music/crazy_lab_title.m4a`：自製樂譜，用 FluidSynth 與 GeneralUser GS 音色庫合成。
+- 主題曲 `prototype/music/crazy_lab_title.m4a`、音效 `prototype/sfx/`：自製樂譜與程式合成，樂器聲用 FluidSynth 與 GeneralUser GS 音色庫合成。

@@ -65,6 +65,7 @@
   <p id="msg" role="status"></p>
 </main>
 <script src="common/records.js"></script>
+<script src="common/sfx.js"></script>
 <script>
   (function () {
     'use strict';
@@ -107,7 +108,7 @@
     }
     $('bExport').addEventListener('click', function () { $('code').value = R.exportCode(); $('code').select(); $('msg').textContent = '存檔碼已產生，請整段複製保存。'; });
     $('bImport').addEventListener('click', function () {
-      if (R.importCode($('code').value)) { $('msg').textContent = '讀入成功！'; render(); }
+      if (R.importCode($('code').value)) { $('msg').textContent = '讀入成功！'; render(); if (window.LabSfx) window.LabSfx.play('unlock'); }
       else $('msg').textContent = '存檔碼格式不對，請確認有整段貼上（開頭是 LAB1-）。原本的紀錄沒有被改動。';
     });
     $('bClear').addEventListener('click', function () {

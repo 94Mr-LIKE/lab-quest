@@ -5,6 +5,9 @@
 (function () {
   'use strict';
   function $(s, el) { return (el || document).querySelector(s); }
+  function sfx(name, delay) { if (window.LabSfx) window.LabSfx.play(name, delay); }
+  var SPK_ON = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  var SPK_OFF = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
   // 危險失敗的圖示（老闆 10/19：要更誇張）：紅黃爆炸鋸齒底、液滴往外噴、整個畫面閃紅震動；仍然不畫人受傷
   var BURST = '<g class="burst"><path d="M100 11 L115 43 L146 17 L141 58 L179 49 L160 81 L189 93 L166 112 L183 136 L154 141 L159 171 L129 159 L123 194 L100 173 L78 192 L71 160 L35 177 L42 144 L9 138 L36 112 L5 92 L43 82 L16 46 L58 56 L58 24 L85 44Z" fill="#e5484d" stroke="#1d2a36" stroke-width="5" stroke-linejoin="round"/>' +
@@ -44,7 +47,8 @@
     root.innerHTML =
       '<header class="top"><a class="back" href="../index.html" aria-label="回原型首頁">‹</a>' +
       '<div class="titles"><span class="stage">' + cfg.stage + '</span><h1>' + cfg.title + '</h1></div>' +
-      '<span class="diff" title="難度">' + cfg.diff + '</span></header>' +
+      '<span class="diff" title="難度">' + cfg.diff + '</span>' +
+      '<button class="sfx-btn" type="button" id="btnSfx" aria-pressed="true" aria-label="音效">' + SPK_ON + '</button></header>' +
       '<section class="mission"><b>任務</b><p>' + cfg.mission + '</p><small>' + cfg.missionNote + '</small></section>' +
       '<main class="layout">' +
         '<section class="card scene-card"><div class="scene-head"><span class="badge" id="status">準備中</span><span class="clock" id="tries">試做 0 次</span></div>' +
@@ -60,10 +64,18 @@
         '<div class="row btns"><button class="btn" type="button" id="btnAgain">再挑戰一次</button><button class="btn primary" type="button" id="btnClose">繼續調整</button><a class="btn primary" id="btnNext" href="../index.html">回任務列表</a></div></div></div>';
     var self = this;
     this.statusEl = $('#status', root); this.logEl = $('#log', root); this.triesEl = $('#tries', root);
-    $('#btnReset', root).addEventListener('click', function () { self.reset(); });
-    $('#btnRetry', root).addEventListener('click', function () { $('#ovFail', root).classList.remove('show'); self.reset(); });
-    $('#btnAgain', root).addEventListener('click', function () { $('#ovResult', root).classList.remove('show'); self.reset(); });
-    $('#btnClose', root).addEventListener('click', function () { $('#ovResult', root).classList.remove('show'); });
+    $('#btnReset', root).addEventListener('click', function () { sfx('reset'); self.reset(); });
+    $('#btnRetry', root).addEventListener('click', function () { sfx('reset'); $('#ovFail', root).classList.remove('show'); self.reset(); });
+    $('#btnAgain', root).addEventListener('click', function () { sfx('reset'); $('#ovResult', root).classList.remove('show'); self.reset(); });
+    $('#btnClose', root).addEventListener('click', function () { sfx('ui_tap'); $('#ovResult', root).classList.remove('show'); });
+    // 音效開關（記在這台裝置）
+    var sb = $('#btnSfx', root);
+    function showSfx(m) { sb.innerHTML = m ? SPK_OFF : SPK_ON; sb.setAttribute('aria-pressed', String(!m)); sb.setAttribute('aria-label', m ? '音效：關' : '音效：開'); }
+    if (window.LabSfx) { showSfx(window.LabSfx.isMuted()); window.LabSfx.onChange(showSfx); sb.addEventListener('click', function () { window.LabSfx.setMuted(!window.LabSfx.isMuted()); sfx('ui_tap'); }); }
+    else sb.style.display = 'none';
+    // 拉桿、＋／－：輕輕的「滴」
+    root.addEventListener('input', function (e) { if (e.target.type === 'range') sfx('slider_tick'); });
+    root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.step')) sfx('slider_tick'); });
     // 道具：點一下或拖到實驗桌
     var drag = null, ghost = document.createElement('div');
     ghost.className = 'ghost-item'; document.body.appendChild(ghost);
@@ -72,6 +84,7 @@
       var t = e.target.closest && e.target.closest('.item');
       if (!t || t.classList.contains('used')) return;
       drag = { id: t.getAttribute('data-item'), x: e.clientX, y: e.clientY, moving: false };
+      sfx('item_pick');
       try { if (t.setPointerCapture) t.setPointerCapture(e.pointerId); } catch (err) { /* 合成事件沒有指標可抓，忽略 */ }
     });
     root.addEventListener('pointermove', function (e) {
@@ -86,24 +99,30 @@
       var d = drag; drag = null; ghost.classList.remove('show'); scene.classList.remove('drop-ready');
       if (cancel) return;
       var r = scene.getBoundingClientRect();
-      if (!d.moving || (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom)) self.cfg.onItem(d.id);
+      if (!d.moving || (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom)) { sfx('item_place'); self.cfg.onItem(d.id); }
       else self.say('器材要放到實驗桌上。');
     }
     root.addEventListener('pointerup', function (e) { end(e, false); });
     root.addEventListener('pointercancel', function (e) { end(e, true); });
     root.addEventListener('click', function (e) {
       var it = e.detail === 0 && e.target.closest && e.target.closest('.item');
-      if (it && !it.classList.contains('used')) self.cfg.onItem(it.getAttribute('data-item'));
+      if (it && !it.classList.contains('used')) { sfx('item_place'); self.cfg.onItem(it.getAttribute('data-item')); }
     });
   }
   Shell.prototype.$ = function (s) { return $(s, this.root); };
-  Shell.prototype.say = function (t, kind) { this.logEl.textContent = t; this.logEl.className = 'log ' + (kind || 'info'); };
+  // say(文字, 樣式, 音效)：樣式是 warn 時預設配「提醒」聲；第三個參數可以指定別的音效，或 false 不出聲
+  Shell.prototype.say = function (t, kind, snd) {
+    this.logEl.textContent = t; this.logEl.className = 'log ' + (kind || 'info');
+    if (snd === undefined && kind === 'warn') snd = 'warn';
+    if (snd) sfx(snd, 0.12);
+  };
   Shell.prototype.status = function (t, cls) { this.statusEl.textContent = t; this.statusEl.className = 'badge ' + (cls || ''); };
   Shell.prototype.tries = function (n) { this.triesEl.textContent = '試做 ' + n + ' 次'; };
   Shell.prototype.used = function (id, on) { var b = this.$('[data-item="' + id + '"]'); if (b) b.classList.toggle('used', on !== false); };
   Shell.prototype.fail = function (icon, title, text) {
     this.$('#failIco').innerHTML = FAIL_ICON[icon] || FAIL_ICON.warn;
     this.$('#failTitle').textContent = title; this.$('#failText').textContent = text;
+    sfx('danger'); if (icon === 'splash') sfx('splash', 0.04);
     // 閃紅、震動的動畫每次都重播；手機有震動功能就短震兩下（iPhone 不支援，會自動略過）
     var ov = this.$('#ovFail'), body = document.body;
     ov.classList.remove('show'); body.classList.remove('dz-quake'); void ov.offsetWidth;
@@ -118,6 +137,11 @@
     this.$('#resCard').textContent = card || ''; this.$('#resCard').style.display = card ? '' : 'none';
     this.$('#btnClose').style.display = ok ? 'none' : '';
     this.$('#btnNext').style.display = ok ? '' : 'none';
+    if (ok) {   // 過關曲，接著星星一顆一顆亮
+      sfx('pass');
+      var n = (title.match(/★/g) || []).length;
+      for (var k = 1; k <= n; k++) sfx('star' + k, 1.15 + 0.34 * (k - 1));
+    } else sfx('miss');
     this.$('#ovResult').classList.add('show');
   };
   Shell.prototype.reset = function () {

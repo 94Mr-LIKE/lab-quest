@@ -98,6 +98,7 @@
     shell.$('#datalog').innerHTML = s.steps.length ? '<table class="data"><thead><tr><th>#</th><th>你做了什麼</th></tr></thead><tbody>' + s.steps.map(function (t, i) { return '<tr><td>' + (i + 1) + '</td><td>' + t + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="ctl-note">你的每一步都會記在這裡。</p>';
   }
 
+  function sfx(n, d) { if (window.LabSfx) window.LabSfx.play(n, d); }
   function onItem(id) {
     var s = st;
     switch (id) {
@@ -125,7 +126,7 @@
     if (s.beakerA > 0 && s.beakerW === 0) {
       return shell.fail('splash', '強酸飛濺！', '你把水倒進濃鹽酸裡。水碰到濃酸會劇烈放熱，把酸噴出來，可能噴到眼睛和皮膚。要「酸加入水」：先在燒杯放水，再把酸慢慢加進去。');
     }
-    s.beakerW += s.wAdd; if (s.waterSrc === 'tap') s.impure = true;
+    s.beakerW += s.wAdd; if (s.waterSrc === 'tap') s.impure = true; sfx('pour');
     log('燒杯加' + (s.waterSrc === 'tap' ? '自來水 ' : '純水 ') + s.wAdd + ' mL');
     shell.say('燒杯裡加了 ' + s.wAdd + ' mL 水。', 'ok'); render();
   }
@@ -139,18 +140,18 @@
     var err = s.tool === 'cylinder' ? (Math.random() - 0.5) * 1.2 : (Math.random() - 0.5) * 0.04;   // 量筒誤差大（遊戲設定值）
     s.vReal += Math.max(0, s.vSet + err);
     if (s.beakerW === 0) s.acidFirst = true;
-    s.beakerA += s.vSet;
+    s.beakerA += s.vSet; sfx('pour');
     log('用' + (s.tool === 'pipette' ? '吸量管' : '量筒') + '量 ' + s.vSet.toFixed(1) + ' mL 濃鹽酸，加進燒杯' + (s.beakerW === 0 ? '（燒杯裡還沒有水）' : '的水裡'));
     shell.say(s.beakerW === 0 ? '濃鹽酸倒進了空燒杯。' : '濃鹽酸慢慢加進水裡，酸入水，正確。', s.beakerW === 0 ? 'warn' : 'ok');
     render();
   }
-  function stir() { if (!st.beakerA && !st.beakerW) return shell.say('燒杯是空的。'); st.stirred = true; log('用玻棒攪拌'); shell.say('攪拌均勻了。', 'ok'); render(); }
+  function stir() { if (!st.beakerA && !st.beakerW) return shell.say('燒杯是空的。'); st.stirred = true; sfx('stir'); log('用玻棒攪拌'); shell.say('攪拌均勻了。', 'ok'); render(); }
   function toFlask() {
     var s = st;
     if (!s.have.flask) return shell.say('先放容量瓶。', 'warn');
     if (!s.beakerA) return shell.say('燒杯裡還沒有鹽酸。', 'warn');
     if (s.inFlask) return;
-    s.inFlask = true;
+    s.inFlask = true; sfx('pour');
     if (s.base) s.vReal *= 0.4;   // 拿了氫氧化鈉又加進來 → 被中和（遊戲設定值）
     log('倒進容量瓶' + (s.rinse ? '，並用純水潤洗燒杯 3 次一起倒入' : '（沒有潤洗燒杯）'));
     shell.say('溶液倒進容量瓶了。接著「加水到刻度線」。', 'ok'); render();
@@ -160,14 +161,15 @@
     if (!s.inFlask) return shell.say('先把溶液倒進容量瓶。', 'warn');
     if (!s.have.water) return shell.say('先準備水。', 'warn');
     if (s.waterSrc === 'tap') s.impure = true;
-    s.toMark = true; s.offset = s.offset || 0.8;
+    s.toMark = true; s.offset = s.offset || 0.8; sfx('pour');
     log('加水到接近刻度線（用下面的拉桿把液面對準刻度線）');
     shell.say('看右邊放大的刻度線，用「液面位置」拉桿把凹液面最低點對準刻度線。', 'info'); render();
   }
-  function shake() { if (!st.toMark) return shell.say('先加水到刻度線，再蓋瓶塞搖勻。', 'warn'); st.shaken = true; log('蓋上瓶塞，倒轉搖勻'); shell.say('搖勻了。可以測定濃度。', 'ok'); render(); }
+  function shake() { if (!st.toMark) return shell.say('先加水到刻度線，再蓋瓶塞搖勻。', 'warn'); st.shaken = true; sfx('shake'); log('蓋上瓶塞，倒轉搖勻'); shell.say('搖勻了。可以測定濃度。', 'ok'); render(); }
   function measure() {
     var s = st;
     if (!s.toMark) return shell.say('還沒完成配製。', 'warn');
+    sfx('action');
     var V = 100 + s.offset;
     var c = C0 * s.vReal * (s.rinse ? 1 : 0.96) / V;   // 沒潤洗燒杯會少約 4%（遊戲設定值）
     if (!s.shaken) c *= 1 + (Math.random() - 0.5) * 0.3;  // 沒搖勻，取樣的地方濃度不均
@@ -186,12 +188,12 @@
       var stars = 1 + (s.tool === 'pipette' && s.rinse && s.shaken ? 1 : 0) + (s.traps === 0 ? 1 : 0);
       if (window.LabRecords) window.LabRecords.onPass('M-ACID', stars);
       shell.status('通過', 'done');
-      shell.say('測定結果：' + c.toFixed(2) + ' M，通過！', 'ok');
+      shell.say('測定結果：' + c.toFixed(2) + ' M，通過！', 'ok', false);
       shell.result(true, '通過！' + '★★★'.slice(0, stars) + '☆☆☆'.slice(0, 3 - stars), '你配出的鹽酸是 ' + c.toFixed(2) + ' M（目標 2.0 ± 0.1 M）。',
         '稀釋前後，鹽酸的量不變：12 M 濃鹽酸取 16.7 mL，加水到 100 mL 就是 2.0 M。稀釋濃酸一定要「酸加入水」，並且戴好護目鏡和手套。' + (why.length ? '可以更好：' + why.join('；') + '。' : ''));
     } else {
       shell.status('沒通過', 'hot');
-      shell.say('測定結果：' + c.toFixed(2) + ' M，還沒達到 2.0 ± 0.1 M。可以按「重來」再配一次。', 'warn');
+      shell.say('測定結果：' + c.toFixed(2) + ' M，還沒達到 2.0 ± 0.1 M。可以按「重來」再配一次。', 'warn', false);
       shell.result(false, '沒通過：' + c.toFixed(2) + ' M', '目標是 2.0 ± 0.1 M。' + (why.length ? '可能的原因：' + why.join('；') + '。' : '想想看：要配 100 mL、2.0 M，需要多少 mL 的 12 M 濃鹽酸？'), '');
     }
   }
