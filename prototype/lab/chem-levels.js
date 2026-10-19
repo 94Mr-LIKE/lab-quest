@@ -1,0 +1,56 @@
+/* 瘋狂實驗室・化學實驗台的關卡（老闆 10/19：操作學 nobook——拖容器到另一個容器邊緣傾倒、吸量管、滴定管；莫耳濃度要 mol/L、試藥給密度）
+ * 座標 cm，實驗桌面 y = 0；fixed 是一開始就在桌上的器材，shelf 是器材櫃（數量）。 */
+(function (root) {
+  'use strict';
+  root.CHEM_LEVELS = [
+    {
+      id: 'CHEM-1', no: 1, stage: '國二 理化・溶液與濃度', diff: 'E3', title: '配 100 g 的 10% 食鹽水',
+      mission: '配出 100 g、重量百分濃度 10% 的食鹽水（誤差 ±0.3%），食鹽要全部溶解。配好按「交給老師」。',
+      note: '把稱量紙拖到電子秤上、按「歸零」；藥匙拖進食鹽罐挖一匙，再拖到紙上方倒一點。水可以用量筒量（把水瓶拖到量筒邊緣，拖藍色圓鈕倒水），也可以把燒杯放在秤上直接秤。玻璃棒拖進燒杯攪拌。',
+      world: { w: 46, h: 22 },
+      fixed: [
+        { type: 'saltjar', x: 3.8 },
+        { type: 'balance', x: 15 },
+        { type: 'beaker250', x: 29 },
+        { type: 'bottle', x: 40, props: { reagent: 'water', vol: 320 } }
+      ],
+      shelf: { paper: 1, spatula: 1, cyl100: 1, rod: 1, sugarjar: 1, beaker100: 1 },
+      eval: 'saltwater',
+      stars: ['過關', '濃度誤差在 ±0.1% 以內', '沒有用到陷阱器材'],
+      learn: '重量百分濃度 ＝ 溶質質量 ÷（溶質＋溶劑）質量 × 100%。100 g 的 10% 食鹽水要 10 g 食鹽、90 g 水。水的密度約 1 g/mL，90 g 水就是 90 mL。用量筒時，視線要和凹液面最低點同高；燒杯上的刻度只是大約，不能拿來精確量體積。'
+    },
+    {
+      id: 'CHEM-2', no: 2, stage: '高中基礎化學・溶液的濃度', diff: 'E4', title: '配 100 mL 的 2.0 mol/L 鹽酸',
+      mission: '用濃鹽酸試藥（37.0%、密度 1.19 g/mL、分子量 36.46）配出 100 mL、2.0 mol/L 的稀鹽酸（±0.1 mol/L）。先算好要取幾 mL。',
+      note: '先點器材櫃的護目鏡、手套戴上（紀錄卡第一行會打勾）。吸量管拖進試劑瓶，拖上面的紅色吸球往上＝吸、往下＝放；選取時右上角放大鏡可以讀刻度：吸量管的刻度 0 在上面、20 在下面，液面停在 5.0 表示管內有 20 − 5.0 = 15.0 mL。洗瓶拖到容器上方，按住藍色圓鈕擠水。容量瓶要加到刻度線、蓋瓶塞、倒轉搖勻。',
+      world: { w: 46, h: 26 },
+      fixed: [
+        { type: 'bottle', x: 4.5, props: { reagent: 'concHCl', vol: 300 } },
+        { type: 'washer', x: 41.5, props: { reagent: 'water', vol: 330 } },
+        { type: 'beaker250', x: 16 },
+        { type: 'vol100', x: 28 }
+      ],
+      shelf: { goggles: 1, gloves: 1, pipette: 1, rod: 1, stopper: 1, cyl50: 1, jug: 1, naoh: 1, lamp: 1 },
+      ppe: true,
+      eval: 'dilution',
+      stars: ['過關', '用吸量管、燒杯有潤洗 2 次以上、有搖勻', '沒有用到陷阱器材'],
+      learn: '① 濃鹽酸濃度：1 L 重 1.19 × 1000 = 1190 g，HCl 佔 37.0% 是 440.3 g，÷ 36.46 = 12.08 mol，所以是 12.08 mol/L。② 要配 0.100 L × 2.0 mol/L = 0.200 mol。③ 0.200 ÷ 12.08 = 0.01656 L，取 16.6 mL。稀釋濃酸一定要「酸加入水」；燒杯倒完要用純水潤洗 2～3 次一起倒進容量瓶，最後加水到刻度線、倒轉搖勻。'
+    },
+    {
+      id: 'CHEM-3', no: 3, stage: '高中選修化學・酸鹼滴定', diff: 'E5', title: '滴定出未知鹽酸的濃度',
+      mission: '用 0.100 mol/L 的 NaOH 標準溶液滴定 20.00 mL 未知濃度的鹽酸，算出它的濃度（誤差 ±2%），填進答案。滴過頭也會失敗。',
+      note: '吸量管取 20.00 mL 未知鹽酸（吸到刻度 0 就是 20.00 mL）放進錐形瓶，加 2 滴酚酞。錐形瓶拖到滴定管下方。拖滴定管的活栓（藍色把手）往右＝打開、越右越快；點一下活栓＝一滴。錐形瓶要「搖晃」混合。滴定前、後都要從放大鏡讀滴定管刻度（0 在上面）。',
+      world: { w: 46, h: 49 },
+      fixed: [
+        { type: 'bottle', x: 4.5, props: { reagent: 'unkHCl', vol: 300 } },
+        { type: 'phpbottle', x: 12.5 },
+        { type: 'burette', x: 28, props: { reagent: 'NaOH01' } },
+        { type: 'washer', x: 41.5, props: { reagent: 'water', vol: 330 } }
+      ],
+      shelf: { pipette: 1, conical: 1, cyl50: 1, beaker250: 1 },
+      eval: 'titration',
+      stars: ['過關', '滴過頭不超過 0.10 mL', '用吸量管量 20.00 mL、沒有用到陷阱器材'],
+      learn: '中和點時，HCl 的莫耳數 ＝ NaOH 的莫耳數：C(HCl) × 20.00 mL ＝ 0.100 × V(NaOH)。所以 C(HCl) ＝ 0.100 × V ÷ 20.00。酚酞在 pH 8.2 以上變粉紅；強酸強鹼的當量點 pH = 7，多一滴 NaOH 就變紅，所以接近終點要一滴一滴加，粉紅色搖晃後 30 秒不褪就是終點。'
+    }
+  ];
+})(typeof window !== 'undefined' ? window : globalThis);

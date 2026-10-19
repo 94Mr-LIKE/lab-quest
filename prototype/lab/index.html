@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-<title>瘋狂實驗室｜物理實驗台</title>
+<title>瘋狂實驗室｜實驗台關卡</title>
 <style>
   body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: #eceef0; color: #13233f; line-height: 1.6; }
   main { max-width: 760px; margin: 0 auto; padding: 18px 16px 40px; }
@@ -19,26 +19,38 @@
   .r .d { display: inline-block; padding: 1px 8px; border-radius: 5px; border: 1.5px solid #13233f; background: #ff6a55; }
   .r .s { display: block; margin-top: 4px; font-size: 18px; color: #f5b820; -webkit-text-stroke: .6px #13233f; letter-spacing: .05em; }
   .back { color: #13233f; font-weight: 800; }
+  h2 { margin: 26px 0 2px; font-size: 21px; font-weight: 900; }
+  .chem .no { background: #b0412e; }
 </style>
 </head>
 <body>
 <main>
   <a class="back" href="../index.html">‹ 原型首頁</a>
-  <h1>物理實驗台</h1>
+  <h1>實驗台關卡</h1>
+  <h2>物理實驗台</h2>
   <p>真的物理：球會照拋體、碰撞、滾動、槓桿、空氣阻力來動。器材自己擺、自己轉，次數有限。</p>
   <div id="list"></div>
+  <h2>化學實驗台</h2>
+  <p>操作學 nobook：容器拖到另一個容器的瓶口放手會架好，拖藍色圓鈕傾倒；吸量管、滴定管、洗瓶、電子秤都要自己操作、自己讀刻度。危險操作直接失敗。</p>
+  <div id="chemList" class="chem"></div>
 </main>
 <script src="../common/records.js"></script>
 <script src="phy-levels.js"></script>
+<script src="chem-levels.js"></script>
 <script>
   (function () {
     'use strict';
     var rec = window.LabRecords ? window.LabRecords.load() : { levels: {} };
-    document.getElementById('list').innerHTML = window.PHY_LEVELS.map(function (l) {
-      var best = rec.levels && rec.levels[l.id] ? rec.levels[l.id].best : 0;
-      return '<a class="card" href="phy.html?lv=' + l.no + '"><span class="no">' + l.no + '</span><span class="t"><b>' + l.title + '</b><span>' + l.stage + '</span></span>' +
-        '<span class="r"><span class="d">' + l.diff + '</span><span class="s" aria-label="' + best + ' 顆星">' + '★★★'.slice(0, best) + '<span style="color:#e3e7ee">' + '★★★'.slice(0, 3 - best) + '</span></span></span></a>';
-    }).join('');
+    // 只放程式內建的關卡文字（不是玩家輸入）
+    function cards(levels, page) {
+      return levels.map(function (l) {
+        var best = rec.levels && rec.levels[l.id] ? Math.max(0, Math.min(3, Math.floor(Number(rec.levels[l.id].best) || 0))) : 0;   // 本機紀錄可能被改過，只接受 0～3
+        return '<a class="card" href="' + page + '?lv=' + l.no + '"><span class="no">' + l.no + '</span><span class="t"><b>' + l.title + '</b><span>' + l.stage + '</span></span>' +
+          '<span class="r"><span class="d">' + l.diff + '</span><span class="s" aria-label="' + best + ' 顆星">' + '★★★'.slice(0, best) + '<span style="color:#e3e7ee">' + '★★★'.slice(0, 3 - best) + '</span></span></span></a>';
+      }).join('');
+    }
+    document.getElementById('list').innerHTML = cards(window.PHY_LEVELS, 'phy.html');
+    document.getElementById('chemList').innerHTML = cards(window.CHEM_LEVELS, 'chem.html');
   })();
 </script>
 </body>
