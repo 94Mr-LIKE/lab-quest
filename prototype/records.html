@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>實驗闖關｜我的紀錄</title>
+<title>瘋狂實驗室｜我的紀錄</title>
 <style>
   body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: #eef1f4; color: #1d2a36; line-height: 1.6; }
   main { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
@@ -51,7 +51,7 @@
   <h2>過關的關卡</h2>
   <table><thead><tr><th>關卡</th><th>最佳</th><th>過關次數</th></tr></thead><tbody id="tLevels"></tbody></table>
 
-  <h2>被老師喊停、學到的安全守則</h2>
+  <h2>危險失敗、學到的安全守則</h2>
   <ul id="lRules"></ul>
 
   <h2>存檔碼</h2>
@@ -71,7 +71,7 @@
     var R = window.LabRecords;
     // 入口與關數（老闆 10/19：國小、國一～國三各 50 關，高中基礎、選修各 100 關）
     var ENTRIES = [['國小', 'E', 50], ['國一', 'J7', 50], ['國二', 'J8', 50], ['國三', 'J9', 50], ['高中基礎', 'SB', 100], ['高中選修', 'SA', 100]];
-    var NAMES = { 'J8-19': '國二 第 19 關　水在幾度沸騰？' };
+    var NAMES = { 'J8-19': '國二 第 19 關　水在幾度沸騰？', 'M-BALL': '任務 A　把鋼珠送進杯子', 'M-ACID': '任務 B　配出 2.0 M 鹽酸' };
     function $(id) { return document.getElementById(id); }
     function td(text, cls) { var c = document.createElement('td'); c.textContent = text; if (cls) c.className = cls; return c; }
     function render() {
@@ -89,7 +89,7 @@
       });
       var tl = $('tLevels'); tl.textContent = '';
       var keys = Object.keys(r.levels);
-      if (!keys.length) { var tr0 = document.createElement('tr'); var c0 = td('還沒有過關的關卡，去地圖挑一關吧！', 'empty'); c0.colSpan = 3; tr0.appendChild(c0); tl.appendChild(tr0); }
+      if (!keys.length) { var tr0 = document.createElement('tr'); var c0 = td('還沒有過關的關卡，去挑一關吧！', 'empty'); c0.colSpan = 3; tr0.appendChild(c0); tl.appendChild(tr0); }
       keys.forEach(function (k) {
         var L = r.levels[k], tr = document.createElement('tr');
         tr.appendChild(td(NAMES[k] || k)); tr.appendChild(td('★★★'.slice(0, L.best) + '☆☆☆'.slice(0, 3 - L.best), 'star')); tr.appendChild(td(L.clears + ' 次'));
@@ -97,7 +97,7 @@
       });
       var ul = $('lRules'); ul.textContent = '';
       var rk = Object.keys(r.rules);
-      if (!rk.length) { var li0 = document.createElement('li'); li0.textContent = '還沒有被老師喊停過，很棒！'; li0.className = 'empty'; ul.appendChild(li0); }
+      if (!rk.length) { var li0 = document.createElement('li'); li0.textContent = '還沒有因為危險動作失敗過，很棒！'; li0.className = 'empty'; ul.appendChild(li0); }
       rk.forEach(function (k) {
         var li = document.createElement('li'), cat = document.createElement('span');
         cat.className = 'cat'; cat.textContent = r.rules[k].cat;

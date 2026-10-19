@@ -1,0 +1,146 @@
+/* P7「科學海報」（成熟版 B，接封面 v5）：一張印得很漂亮的科學海報——淺灰紙、深海軍藍粗線、珊瑚紅按鈕、黃與薄荷點綴，加一點印刷網點；俐落、不卡通 */
+:root {
+  --bg: #eceef0; --ink: #13233f; --muted: #46546b; --focus: #13233f;
+  --card: #ffffff; --card-line: #13233f; --shadow: none;
+  --scene-line: #13233f; --scene-bg: #ffffff; --scene-drop: #fff3c4;
+  --line: #13233f; --btn: #ffffff; --item: #ffffff; --item-ink: #13233f;
+  --primary: #ff6a55; --primary-ink: #0b1528;
+  --accent: #13233f; --accent-soft: rgba(255, 106, 85, .40);
+  --badge: #e3e7ee; --badge-ink: #13233f; --hot: #ffe0d6; --hot-ink: #a8321c; --boil: #d9ecfb; --boil-ink: #0b4d88; --ok: #1b7a52;
+  --goal-bg: #ffffff; --goal-ink: #13233f; --goal-chip: #f5c638; --goal-chip-ink: #13233f;
+  --log-bg: #f4f6f8; --ok-bg: #ddf4e8; --warn-bg: #fff1c4; --hint-bg: #e3ecfb; --warn-ink: #8a5300; --stop: #c4162a;
+  --out-bg: #ffffff; --star: #f5b820; --star-off: #f4f6f9;
+}
+.lab-svg .table { stroke: #13233f; stroke-width: 3; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #13233f; stroke-width: 2; stroke-dasharray: 6 6; opacity: .5; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3; }
+.lab-svg .metal { fill: #7d8aa0; }
+.lab-svg .rod { stroke: #7d8aa0; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #13233f; stroke-width: 4.5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #f1f3f6; stroke: #13233f; stroke-width: 1.5; }
+.lab-svg .mesh-core { fill: #f2b45a; }
+.lab-svg .lamp-body { fill: #e8f4fb; stroke: #13233f; stroke-width: 2.2; }
+.lab-svg .wick { stroke: #13233f; stroke-width: 2.5; }
+.lab-svg .flame-out { fill: #ff8a2a; stroke: #13233f; stroke-width: 1.4; }
+.lab-svg .flame-in { fill: #3d7bf0; }
+.lab-svg .glass { fill: rgba(200, 228, 246, .30); stroke: #13233f; stroke-width: 2.6; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #13233f; stroke-width: 1.8; }
+.lab-svg .water { fill: #4fb3ea; }
+.lab-svg .bubbles circle { fill: #ffffff; stroke: #13233f; stroke-width: 1.1; }
+.lab-svg .ice rect { fill: #f4fbff; stroke: #13233f; stroke-width: 1.4; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #8a97ab; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 7; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: #ffffff; stroke: #13233f; stroke-width: 1.8; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #e8322a; }
+.lab-svg .chip { fill: #ddf4e8; stroke: #1b7a52; stroke-width: 1.5; }
+.lab-svg .chip-t { fill: #145c3c; font-size: 15px; font-weight: 700; }
+
+/* 關卡地圖 */
+:root { --path: #f5c638; --path-under: #13233f; --node: #ffffff; --node-ring: #13233f; --node-ink: #13233f; --node-shadow: rgba(19, 35, 63, .28); --lock: #e3e7ee; --lock-ring: #9aa6b8; --lock-shadow: rgba(19, 35, 63, .18); --lock-ink: #56637a; }
+/* 每一章是一張海報色紙＋淡淡的格線與印刷網點，由下往上：薄荷 → 黃 → 天空 → 珊瑚 → 最後一章是深藍的宇宙（和封面 v5 的星球呼應）；相鄰兩章在色盲模擬下也分得開 */
+.band0 { background: radial-gradient(rgba(19, 35, 63, .07) 1px, transparent 1.4px) 0 0 / 7px 7px, linear-gradient(rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, linear-gradient(90deg, rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, #cfeedd; }
+.band1 { background: radial-gradient(rgba(19, 35, 63, .07) 1px, transparent 1.4px) 0 0 / 7px 7px, linear-gradient(rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, linear-gradient(90deg, rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, #faeab4; }
+.band2 { background: radial-gradient(rgba(19, 35, 63, .07) 1px, transparent 1.4px) 0 0 / 7px 7px, linear-gradient(rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, linear-gradient(90deg, rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, #cfe2f5; }
+.band3 { background: radial-gradient(rgba(19, 35, 63, .07) 1px, transparent 1.4px) 0 0 / 7px 7px, linear-gradient(rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, linear-gradient(90deg, rgba(19, 35, 63, .06) 1px, transparent 1px) 0 0 / 36px 36px, #f9cfc4; }
+.band4 { background: radial-gradient(circle, rgba(255, 255, 255, .85) 1.2px, transparent 1.7px) 0 0 / 41px 37px, radial-gradient(circle, rgba(245, 198, 56, .7) 1.2px, transparent 1.7px) 17px 23px / 59px 53px, #13233f; }
+
+/* ===== 以下是這套配色的延伸設定（不影響上面的必備變數；不要可以整段刪掉） ===== */
+
+:root {
+  /* 四科顏色（和 P1、P3～P5 相同；生物、化學最深，物理、地科中等——紅綠色盲看得出深淺） */
+  --subj-bio: #0f5a24; --subj-phy: #3a88ee; --subj-chem: #8a1c74; --subj-earth: #a7851d;
+  --subj-bio-ink: #ffffff; --subj-phy-ink: #0b1528; --subj-chem-ink: #ffffff; --subj-earth-ink: #0b1528;
+  --star-ink: #7a4f00; --star-line: #13233f; --star-off-line: #9aa6b8;
+  /* 點綴色：黃＝重點（任務標籤、地圖路線）、薄荷＝成功 */
+  --yellow: #f5c638; --mint: #34c38f;
+  /* 拉桿 */
+  --range-track: #ffffff; --range-line: #13233f; --range-thumb: #ff6a55; --range-thumb-ring: #13233f;
+  /* 道具格：白格子，左上角一個用途色小方塊（容器天藍、測量黃、加熱珊瑚、安全薄荷、材料灰） */
+  --kind-glass: #4fb3ea; --kind-measure: #f5c638; --kind-fire: #ff6a55; --kind-safe: #34c38f; --kind-stuff: #9aa6b8;
+  /* 安全訊息 */
+  --stop-bg: #ffe1dc; --hint-icon: #1f5fbf;
+  /* 字型：系統字為主；裝了（或打包了）OFL 開源字就優先用。計時器用等寬字（像儀器讀數）；其他數字用「等寬數字」設定，中文字不受影響 */
+  --font-ui: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+}
+
+/* 字型、字重、字距：海報標題要重；小標題字距開；數字寬度固定（讀數變動時不會左右跳） */
+body, html body.map-page { font-family: var(--font-ui); }
+.top h1 { font-weight: 900; letter-spacing: .02em; }
+.stage, .map-top .ttl span { letter-spacing: .08em; }
+.card h2 { font-weight: 900; letter-spacing: .06em; }
+.btn, #sheetGo { font-weight: 800; letter-spacing: .06em; }
+.clock { font-family: var(--font-num); }
+.slider output, #starTotal, #progress, .node .num, .stars-hud { font-variant-numeric: tabular-nums; }
+
+/* 背景：淺灰紙＋很淡的印刷網點（只在關卡畫面） */
+body:not(.map-page) { background-image: radial-gradient(rgba(19, 35, 63, .07) 1px, transparent 1.4px); background-size: 7px 7px; }
+
+/* 海報的粗線、小圓角、不用陰影 */
+.card { border-width: 2px; border-radius: 6px; }
+.goal { border: 2px solid var(--ink); border-radius: 6px; }
+.btn, .step, .item, .hint-btn, .slider output { border-width: 2px; border-radius: 6px; }
+.btn.primary { border-color: var(--ink); }
+.badge, .goal b, .cat, .lv-sheet .chip { border-radius: 4px; }
+.badge { border: 1.5px solid var(--ink); }
+.sheet { border: 2px solid var(--ink); border-radius: 8px; }
+.sheet-ov .lv-sheet { border-radius: 8px 8px 0 0; border-top: 2px solid var(--ink); }
+.lv-sheet #sheetGo { border: 2px solid var(--ink); border-radius: 6px; }
+.map-page .map-top { border-bottom: 2px solid var(--ink); }
+.btn.primary:not(:disabled):active, .lv-sheet #sheetGo:not(:disabled):active { filter: brightness(.92); }
+.kcard { border: 1.5px solid var(--ink); border-radius: 6px; }
+/* 實驗桌：方格紙＋底部一條黃色色帶（海報的色塊） */
+.scene { border-radius: 4px; background-image: linear-gradient(to top, #fbe7a6 0 6.2%, transparent 6.2%), linear-gradient(#e6eaf0 1px, transparent 1px), linear-gradient(90deg, #e6eaf0 1px, transparent 1px); background-size: 100% 100%, 2.25% 3.1034%, 2.25% 3.1034%; }
+
+/* 拉桿：粗框軌道＋珊瑚把手（Firefox 會自動顯示「已拉過」的填色；Chrome、Safari 要等程式在拉桿上設定 --fill 百分比才會有） */
+input[type=range] { -webkit-appearance: none; appearance: none; height: 44px; background: transparent; }
+input[type=range]::-webkit-slider-runnable-track { height: 10px; border-radius: 2px; background: linear-gradient(to right, var(--range-thumb) var(--fill, 0%), var(--range-track) var(--fill, 0%)); border: 2px solid var(--range-line); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border-radius: 50%; background: var(--range-thumb); border: 2px solid var(--range-thumb-ring); }
+input[type=range]::-moz-range-track { height: 10px; border-radius: 2px; background: var(--range-track); border: 2px solid var(--range-line); }
+input[type=range]::-moz-range-progress { height: 10px; background: var(--range-thumb); }
+input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--range-thumb); border: 2px solid var(--range-thumb-ring); }
+input[type=range]:disabled::-webkit-slider-thumb { background: #c9d1dc; }
+input[type=range]:disabled::-moz-range-thumb { background: #c9d1dc; }
+
+/* 道具格：左上角用途色小方塊（正式版建議由程式加 data-kind，就不用在這裡一個一個列） */
+.tray .item { position: relative; }
+.tray .item::before { content: ""; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px; background: var(--kind, transparent); border: 1.5px solid var(--ink); }
+.tray .item[data-item="beaker"], .tray .item[data-item="cylinder"] { --kind: var(--kind-glass); }
+.tray .item[data-item="thermo"] { --kind: var(--kind-measure); }
+.tray .item[data-item="lamp"], .tray .item[data-item="igniter"], .tray .item[data-item="cap"] { --kind: var(--kind-fire); }
+.tray .item[data-item="goggles"] { --kind: var(--kind-safe); }
+.tray .item[data-item="ice"] { --kind: var(--kind-stuff); }
+
+/* 安全記號（形狀照國際安全標誌）：喊停＝紅圈斜線＋紅白條紋、提醒＝黃色三角形、成功＝綠色打勾、提示＝藍色 i */
+.sheet.stop { padding-top: 28px; background: repeating-linear-gradient(-45deg, #c4162a 0 10px, #ffffff 10px 20px) top / 100% 10px no-repeat, var(--card); }
+.stop-title::before { content: ""; display: inline-block; width: 1.05em; height: 1.05em; margin-right: 8px; vertical-align: -0.16em; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9.6' fill='white' stroke='%23c4162a' stroke-width='3.2'/%3E%3Cpath d='M5.4 5.4 18.6 18.6' stroke='%23c4162a' stroke-width='3.2'/%3E%3C/svg%3E") center / contain no-repeat; }
+.log { border: 1.5px solid var(--ink); }
+.log.ok, .log.warn, .log.stop, .log.hint { padding-left: 46px; background-repeat: no-repeat; background-position: 12px 11px; background-size: 24px 24px; }
+.log.stop { background-color: var(--stop-bg); border-left: 6px solid var(--stop); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9.6' fill='white' stroke='%23c4162a' stroke-width='3.2'/%3E%3Cpath d='M5.4 5.4 18.6 18.6' stroke='%23c4162a' stroke-width='3.2'/%3E%3C/svg%3E"); }
+.log.warn { border-left: 6px solid #f5c638; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.8 22.6 21H1.4Z' fill='%23ffd23f' stroke='%23111' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12 9.2v5.6' stroke='%23111' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='17.8' r='1.5' fill='%23111'/%3E%3C/svg%3E"); }
+.log.ok { border-left: 6px solid var(--mint); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231b7a52'/%3E%3Cpath d='M6.6 12.4l3.6 3.6 7.4-7.8' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.log.hint { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231f5fbf'/%3E%3Ccircle cx='12' cy='7' r='1.8' fill='white'/%3E%3Cpath d='M12 10.8v7' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"); }
+.slider output.warn { background: var(--warn-bg); border-color: var(--ink); }
+.badge.done::before { content: "✓ "; }
+
+/* 地圖：科目圈顏色＋右上角「生／理／化／地」字標；關卡圈加一圈海軍藍細框；挑戰關收斂成 8px 圓角 */
+.map .node.s-bio { --node-ring: var(--subj-bio); --subj-ink: var(--subj-bio-ink); }
+.map .node.s-phy { --node-ring: var(--subj-phy); --subj-ink: var(--subj-phy-ink); }
+.map .node.s-chem { --node-ring: var(--subj-chem); --subj-ink: var(--subj-chem-ink); }
+.map .node.s-earth { --node-ring: var(--subj-earth); --subj-ink: var(--subj-earth-ink); }
+.map .node { box-shadow: 0 0 0 2px var(--ink), 0 4px 0 2px var(--node-shadow); }
+.map .node.lock { box-shadow: 0 0 0 2px var(--lock-ring); }
+.map .node.hard { border-radius: 8px; }
+.map .node:not(.lock)::after { position: absolute; right: -11px; top: -11px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; border: 2px solid var(--ink); background: var(--node-ring); color: var(--subj-ink, #fff); font-size: 15px; font-weight: 800; line-height: 1; }
+.map .node.s-bio:not(.lock)::after { content: "生"; }
+.map .node.s-phy:not(.lock)::after { content: "理"; }
+.map .node.s-chem:not(.lock)::after { content: "化"; }
+.map .node.s-earth:not(.lock)::after { content: "地"; }
+.map .chapter { border: 2px solid var(--ink); border-radius: 6px; box-shadow: none; letter-spacing: .04em; }
+
+/* 星星：金色加海軍藍細描邊；地圖右上角星星總數用深金色字 */
+.stars-hud i, .big-stars i, #sheetStars i, .mini-stars { -webkit-text-stroke: 1px var(--star-line); }
+.stars-hud i:not(.on), .big-stars i:not(.on), #sheetStars i.off, .mini-stars i { -webkit-text-stroke-color: var(--star-off-line); }
+.map-top #starTotal { color: var(--star-ink); }

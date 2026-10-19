@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>實驗闖關原型｜關卡地圖</title>
+<title>瘋狂實驗室（舊玩法）｜關卡地圖</title>
 <link rel="stylesheet" href="theme.css" id="themeCss">
 <script>
-  /* 配色試看：網址加 ?palette=p1（p1～p4）就換成色彩專家的配色，換頁後會記住；?palette=off 換回原本的 */
+  /* 配色試看：網址加 ?palette=p1（p1～p9）就換成色彩專家的配色，換頁後會記住；?palette=off 換回原本的 */
   (function () {
-    var m = /[?&]palette=(p[1-4]|off)/.exec(location.search), p;
+    var m = /[?&]palette=(p[1-9]|off)/.exec(location.search), p;
     try { if (m) sessionStorage.setItem("labPalette", m[1]); p = sessionStorage.getItem("labPalette"); } catch (e) { p = m && m[1]; }
     if (p && p !== "off") document.getElementById("themeCss").href = "../palettes/" + p + ".css";
   })();

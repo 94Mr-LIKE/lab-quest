@@ -204,7 +204,7 @@
       var tile = e.target.closest && e.target.closest('.item');
       if (!tile || tile.classList.contains('used')) return;
       drag = { id: tile.getAttribute('data-item'), x: e.clientX, y: e.clientY, moving: false, tile: tile };
-      tile.setPointerCapture && tile.setPointerCapture(e.pointerId);
+      try { if (tile.setPointerCapture) tile.setPointerCapture(e.pointerId); } catch (err) { /* 合成事件沒有指標可抓，忽略 */ }
     });
     root.addEventListener('pointermove', function (e) {
       if (!drag) return;

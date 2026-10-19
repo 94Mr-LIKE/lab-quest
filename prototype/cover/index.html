@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>瘋狂實驗室</title>
+<style>
+  /* 封面：背景插畫由 GPT 繪製；標題、按鈕由程式排版（文字清楚、隨時可改字）
+     老闆 10/19：高中生也要想玩、字型色調不要太幼稚 → 不歪字、不用糖果色，粗黑體＋字距＋細線 */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", sans-serif; background: #0e1a24; color: #f3efe6; display: flex; justify-content: center; align-items: center; }
+  /* 手機直拿：整個螢幕都是封面（左右多出來的圖裁掉）；平板、電腦：寬度最多到高度的 3/4 */
+  .stage { position: relative; width: 100vw; height: 100dvh; max-width: calc(100dvh * .75); overflow: hidden; background-size: cover; background-position: center top; }
+  .v1 .stage { background-image: url(img/cover1.jpg); }
+  .v2 .stage { background-image: url(img/cover2.jpg); }
+  .v3 .stage { background-image: url(img/cover3.jpg); }
+  .shade { position: absolute; inset: 0; pointer-events: none; }
+  .v1 .shade { background: linear-gradient(#0b1620e6 0%, #0b162000 34%, #0b162000 72%, #0b1620d9 100%); }
+  .v3 .shade { background: linear-gradient(#0d2a3acc 0%, #0d2a3a00 30%, #0d2a3a00 70%, #1a0f08cc 100%); }
+
+  .head { position: absolute; left: 7%; right: 7%; }
+  .eyebrow { margin: 0 0 .6em; font: 700 min(3.4vw, 2.1dvh)/1 ui-monospace, "SF Mono", Consolas, monospace; letter-spacing: .32em; color: #f2b544; }
+  .logo { margin: 0; font-weight: 900; line-height: 1.05; letter-spacing: .06em; font-size: min(15vw, 9.2dvh); color: #fbf7ee; text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+  .rule { width: 3.2em; height: 4px; margin: .7em 0 .7em; background: #f2b544; border-radius: 2px; }
+  .tag { margin: 0; font-weight: 600; font-size: min(4.2vw, 2.6dvh); letter-spacing: .08em; color: #e9e3d6; }
+
+  .v1 .head { top: 6%; text-align: left; }
+  .v2 .head { top: 13%; text-align: left; }
+  .v2 .logo { font-size: min(19vw, 11.5dvh); line-height: .98; color: #f6f1e4; text-shadow: none; }
+  .v2 .logo .l2 { display: block; color: #ff6b57; }
+  .v2 .eyebrow, .v2 .rule { color: #ffd23f; } .v2 .rule { background: #ffd23f; }
+  .v2 .tag { display: inline-block; padding: .3em .7em; border-radius: 6px; background: rgba(15, 26, 46, .88); }
+  .v3 .head { top: 5%; text-align: center; }
+  .v3 .rule { margin-left: auto; margin-right: auto; background: #ffb347; }
+  .v3 .eyebrow { color: #ffd8a0; }
+
+  .bottom { position: absolute; left: 7%; right: 7%; bottom: 4.5%; display: flex; flex-direction: column; gap: 10px; }
+  .v3 .bottom { align-items: center; }
+  .start { display: block; padding: .7em 1em; border-radius: 14px; background: #f2b544; color: #14202b; font-size: min(5.6vw, 3.4dvh); font-weight: 900; letter-spacing: .12em; text-align: center; text-decoration: none; box-shadow: 0 10px 24px rgba(0, 0, 0, .35); }
+  .v2 .start { background: #ff6b57; color: #0f1a2e; }
+  .v3 .start { width: 100%; background: #ffb347; }
+  .start:active { transform: translateY(2px); }
+  .links { display: flex; gap: 10px; }
+  .links a, .links button { flex: 1; min-height: 46px; padding: 0 14px; border-radius: 12px; border: 1.5px solid rgba(251, 247, 238, .55); background: rgba(10, 20, 28, .55); color: #fbf7ee; font: inherit; font-weight: 700; font-size: 15px; letter-spacing: .04em; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .v3 .links { width: 100%; }
+  .count { margin: 0 0 2px; font-size: 14px; font-weight: 600; letter-spacing: .04em; color: #e9e3d6; text-shadow: 0 1px 6px rgba(0, 0, 0, .6); }
+  :focus-visible { outline: 3px solid #f2b544; outline-offset: 3px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .head > * { animation: rise .7s ease-out backwards; }
+    .head > :nth-child(2) { animation-delay: .08s; } .head > :nth-child(3) { animation-delay: .16s; } .head > :nth-child(4) { animation-delay: .24s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  }
+</style>
+</head>
+<body class="v1">
+<main class="stage" aria-label="瘋狂實驗室封面">
+  <div class="shade"></div>
+  <div class="head">
+    <p class="eyebrow">CRAZY LAB</p>
+    <h1 class="logo"><span class="l1">瘋狂</span><span class="l2">實驗室</span></h1>
+    <div class="rule"></div>
+    <p class="tag">國小到高中・自然科實驗解謎</p>
+  </div>
+  <div class="bottom">
+    <p class="count" id="playerCount" hidden></p>
+    <a class="start" href="../index.html">開始實驗</a>
+    <div class="links">
+      <a href="../records.html">我的紀錄</a>
+      <button type="button" id="bgmBtn" aria-pressed="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="currentColor"/><circle cx="17" cy="16" r="3" fill="currentColor"/></svg>
+        <span id="bgmLabel">音樂：關</span></button>
+    </div>
+  </div>
+</main>
+<audio id="bgm" src="../music/crazy_lab_title.m4a" loop preload="none"></audio>
+<script src="../common/counter.js"></script>
+<script>
+  (function () {
+    'use strict';
+    // 三個封面方向：網址加 ?v=1（夜間密室）、?v=2（科學海報）、?v=3（夕陽連鎖機關）
+    var m = /[?&]v=([123])/.exec(location.search);
+    document.body.className = 'v' + (m ? m[1] : '1');
+    window.LabCounter.show(document.getElementById('playerCount'));
+    // 瀏覽器規定要使用者按過才能播聲音，所以音樂由按鈕開關
+    var a = document.getElementById('bgm'), btn = document.getElementById('bgmBtn'), lab = document.getElementById('bgmLabel');
+    btn.addEventListener('click', function () {
+      if (a.paused) { a.volume = 0.6; a.play().then(function () { lab.textContent = '音樂：開'; btn.setAttribute('aria-pressed', 'true'); }, function () { lab.textContent = '音樂：無法播放'; }); }
+      else { a.pause(); lab.textContent = '音樂：關'; btn.setAttribute('aria-pressed', 'false'); }
+    });
+  })();
+</script>
+</body>
+</html>

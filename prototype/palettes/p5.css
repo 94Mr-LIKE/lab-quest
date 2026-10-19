@@ -1,0 +1,137 @@
+/* P5「瘋狂實驗室」（P3 進化 B）：像一本熱鬧的科學漫畫——粗黑描邊、貼紙陰影、安全標誌條紋；好玩，但規矩一眼就看得懂 */
+:root {
+  --bg: #6fc2f0; --ink: #10233a; --muted: #2c4458; --focus: #10233a;
+  --card: #ffffff; --card-line: #10233a; --shadow: 5px 5px 0 #10233a;
+  --scene-line: #10233a; --scene-bg: #f5fbff; --scene-drop: #fff1dc;
+  --line: #10233a; --btn: #ffffff; --item: #ffffff; --item-ink: #10233a;
+  --primary: #ff9a2a; --primary-ink: #0a1626;
+  --accent: #b04a00; --accent-soft: rgba(255, 154, 42, .50);
+  --badge: #e2f0fa; --badge-ink: #10233a; --hot: #ffd9b3; --hot-ink: #8a3200; --boil: #c9ecff; --boil-ink: #0a4a85; --ok: #1d7a3e;
+  --goal-bg: #ffffff; --goal-ink: #10233a; --goal-chip: #10233a; --goal-chip-ink: #ffffff;
+  --log-bg: #f2f9fe; --ok-bg: #dff5e5; --warn-bg: #fff2bf; --hint-bg: #e4edff; --warn-ink: #9a3f00; --stop: #c62828;
+  --out-bg: #ffffff; --star: #ffc21a; --star-off: #f7f9fc;
+}
+.lab-svg .table { stroke: #10233a; stroke-width: 4; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #e06d00; stroke-width: 2.5; stroke-dasharray: 7 6; opacity: .7; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3.5; }
+.lab-svg .metal { fill: #7f93a6; stroke: #10233a; stroke-width: 1.5; }
+.lab-svg .rod { stroke: #7f93a6; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #10233a; stroke-width: 5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #eef3f7; stroke: #10233a; stroke-width: 1.8; }
+.lab-svg .mesh-core { fill: #ffb35c; }
+.lab-svg .lamp-body { fill: #dff3ff; stroke: #10233a; stroke-width: 2.6; }
+.lab-svg .wick { stroke: #10233a; stroke-width: 2.5; }
+.lab-svg .flame-out { fill: #ff8a00; stroke: #10233a; stroke-width: 2; }
+.lab-svg .flame-in { fill: #3d86ff; }
+.lab-svg .glass { fill: rgba(185, 228, 252, .35); stroke: #10233a; stroke-width: 3; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #10233a; stroke-width: 2; }
+.lab-svg .water { fill: #3cc4f5; }
+.lab-svg .bubbles circle { fill: #ffffff; stroke: #10233a; stroke-width: 1.3; }
+.lab-svg .ice rect { fill: #f4fdff; stroke: #10233a; stroke-width: 1.6; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #5b6f82; stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 5 7; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: #ffffff; stroke: #10233a; stroke-width: 2; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #ff3b30; }
+.lab-svg .chip { fill: #a3e6b4; stroke: #10233a; stroke-width: 2; }
+.lab-svg .chip-t { fill: #10233a; font-size: 15px; font-weight: 700; }
+
+/* 關卡地圖 */
+:root { --path: #ffffff; --path-under: #1f3550; --node: #ffffff; --node-ring: #10233a; --node-ink: #10233a; --node-shadow: #10233a; --lock: #e8eef3; --lock-ring: #6e8396; --lock-shadow: #6e8396; --lock-ink: #4d6275; }
+/* 地圖是一棟五層樓的瘋狂實驗室，每一章一個房間、一種試劑色的磁磚牆（由下往上）：檸檬 → 汽水 → 西瓜 → 葡萄 → 薄荷；相鄰兩層在色盲模擬下也分得開 */
+.band0 { background: linear-gradient(rgba(255, 255, 255, .5) 2px, transparent 2px) 0 0 / 40px 40px, linear-gradient(90deg, rgba(255, 255, 255, .5) 2px, transparent 2px) 0 0 / 40px 40px, #ffe27a; }
+.band1 { background: linear-gradient(rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, linear-gradient(90deg, rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, #8fd0f7; }
+.band2 { background: linear-gradient(rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, linear-gradient(90deg, rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, #ffab9e; }
+.band3 { background: linear-gradient(rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, linear-gradient(90deg, rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, #c6b3f2; }
+.band4 { background: linear-gradient(rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, linear-gradient(90deg, rgba(255, 255, 255, .45) 2px, transparent 2px) 0 0 / 40px 40px, #8fe3c8; }
+
+/* ===== 以下是這套配色的延伸設定（不影響上面的必備變數；不要可以整段刪掉） ===== */
+
+:root {
+  /* 四科顏色（和 P1、P3、P4 相同；深淺刻意拉開，紅綠色盲看得出深淺） */
+  --subj-bio: #0f5a24; --subj-phy: #3a88ee; --subj-chem: #8a1c74; --subj-earth: #a7851d;
+  --subj-bio-ink: #ffffff; --subj-phy-ink: #111820; --subj-chem-ink: #ffffff; --subj-earth-ink: #111820;
+  --star-ink: #7a4f00; --star-line: #10233a; --star-off-line: #8fa7ba;
+  /* 拉桿 */
+  --range-track: #ffffff; --range-line: #10233a; --range-thumb: #ff9a2a; --range-thumb-ring: #10233a;
+  /* 道具格依用途分底色（名稱一定寫在格子裡，顏色只是輔助）：容器、測量、加熱、安全、材料 */
+  --tile-glass: #a9dcff; --tile-measure: #fff07a; --tile-fire: #ff9f6b; --tile-safe: #9fe3b0; --tile-stuff: #c9f0ec;
+  /* 安全訊息：喊停底色、提示記號 */
+  --stop-bg: #ffe1dd; --hint-icon: #1f5fbf;
+}
+
+/* 背景：漫畫網點（只在關卡畫面） */
+body:not(.map-page) { background-image: radial-gradient(rgba(255, 255, 255, .38) 2.2px, transparent 2.8px); background-size: 16px 16px; }
+.top h1, .card h2, .sheet h2 { font-weight: 900; }
+
+/* 漫畫粗描邊＋貼紙陰影 */
+.card { border-width: 3px; border-radius: 20px; }
+.goal { border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.kcard { border: 2px dashed var(--ink); }
+.badge { border: 2px solid var(--ink); }
+.sheet { border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+/* 實驗室磁磚牆＋木頭桌面 */
+.scene { border: 2.5px solid var(--ink); background-image: linear-gradient(to top, #ffd9a8 0 6.2%, transparent 6.2%), linear-gradient(#dcebf5 1.5px, transparent 1.5px), linear-gradient(90deg, #dcebf5 1.5px, transparent 1.5px); background-size: 100% 100%, 12.5% 17.24%, 12.5% 17.24%; }
+
+/* 按鈕：粗黑框＋底部厚邊，按下去會沉下去 */
+.btn, .step, .hint-btn { border-width: 3px; border-color: var(--ink); box-shadow: 0 5px 0 var(--ink); transition: transform .06s, box-shadow .06s; }
+.btn.primary { border-color: var(--ink); }
+.btn:not(:disabled):active, .step:active, .hint-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.btn:disabled { box-shadow: none; }
+.lv-sheet #sheetGo { border: 3px solid var(--ink); box-shadow: 0 5px 0 var(--ink); }
+.lv-sheet #sheetGo:not(:disabled):active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.lv-sheet { border-top: 3px solid var(--ink); }
+.slider output { border-width: 2.5px; border-color: var(--ink); }
+
+/* 拉桿：粗框軌道＋大顆橘色把手（Firefox 會自動顯示「已拉過」的填色；Chrome、Safari 要等程式在拉桿上設定 --fill 百分比才會有，沒設定時就是一條軌道） */
+input[type=range] { -webkit-appearance: none; appearance: none; height: 44px; background: transparent; }
+input[type=range]::-webkit-slider-runnable-track { height: 16px; border-radius: 8px; background: linear-gradient(to right, var(--range-thumb) var(--fill, 0%), var(--range-track) var(--fill, 0%)); border: 3px solid var(--range-line); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 34px; height: 34px; margin-top: -12px; border-radius: 50%; background: var(--range-thumb); border: 3px solid var(--range-thumb-ring); box-shadow: 0 4px 0 var(--range-thumb-ring); }
+input[type=range]::-moz-range-track { height: 16px; border-radius: 8px; background: var(--range-track); border: 3px solid var(--range-line); }
+input[type=range]::-moz-range-progress { height: 16px; border-radius: 8px; background: var(--range-thumb); }
+input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 50%; background: var(--range-thumb); border: 3px solid var(--range-thumb-ring); box-shadow: 0 4px 0 var(--range-thumb-ring); }
+input[type=range]:disabled::-webkit-slider-thumb { background: #c9d6e0; }
+input[type=range]:disabled::-moz-range-thumb { background: #c9d6e0; }
+
+/* 道具格：依用途分底色、粗黑框（正式版建議由程式加 data-kind，就不用在這裡一個一個列） */
+.tray .item { border-width: 3px; border-color: var(--ink); background: var(--tile, var(--item)); box-shadow: 0 4px 0 var(--ink); }
+.tray .item[data-item="beaker"], .tray .item[data-item="cylinder"] { --tile: var(--tile-glass); }
+.tray .item[data-item="thermo"] { --tile: var(--tile-measure); }
+.tray .item[data-item="lamp"], .tray .item[data-item="igniter"], .tray .item[data-item="cap"] { --tile: var(--tile-fire); }
+.tray .item[data-item="goggles"] { --tile: var(--tile-safe); }
+.tray .item[data-item="ice"] { --tile: var(--tile-stuff); }
+.tray .item.used { box-shadow: none; }
+
+/* 安全記號（形狀照國際安全標誌）：喊停＝紅圈斜線＋紅白條紋、提醒＝黃色三角形＋黃黑條紋、成功＝綠色打勾、提示＝藍色 i */
+.sheet.stop { padding-top: 30px; background: repeating-linear-gradient(-45deg, #c62828 0 12px, #ffffff 12px 24px) top / 100% 12px no-repeat, var(--card); }
+.stop-title::before { content: ""; display: inline-block; width: 1.05em; height: 1.05em; margin-right: 8px; vertical-align: -0.16em; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9.6' fill='white' stroke='%23c62828' stroke-width='3.2'/%3E%3Cpath d='M5.4 5.4 18.6 18.6' stroke='%23c62828' stroke-width='3.2'/%3E%3C/svg%3E") center / contain no-repeat; }
+.log { border: 2.5px solid var(--ink); }
+.log.ok, .log.stop, .log.hint { padding-left: 46px; background-repeat: no-repeat; background-position: 12px 11px; background-size: 24px 24px; }
+.log.stop { background-color: var(--stop-bg); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9.6' fill='white' stroke='%23c62828' stroke-width='3.2'/%3E%3Cpath d='M5.4 5.4 18.6 18.6' stroke='%23c62828' stroke-width='3.2'/%3E%3C/svg%3E"); }
+.log.warn { padding-left: 56px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.8 22.6 21H1.4Z' fill='%23ffd23f' stroke='%23111' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12 9.2v5.6' stroke='%23111' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='17.8' r='1.5' fill='%23111'/%3E%3C/svg%3E") 22px 11px / 24px 24px no-repeat, repeating-linear-gradient(-45deg, #ffd23f 0 6px, #10233a 6px 12px) 0 0 / 10px 100% no-repeat, var(--warn-bg); }
+.log.ok { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231d7a3e'/%3E%3Cpath d='M6.6 12.4l3.6 3.6 7.4-7.8' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.log.hint { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231f5fbf'/%3E%3Ccircle cx='12' cy='7' r='1.8' fill='white'/%3E%3Cpath d='M12 10.8v7' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"); }
+.slider output.warn { background: var(--warn-bg); border-color: var(--ink); }
+.badge.done::before { content: "✓ "; }
+.cat { border: 2px solid var(--ink); }
+
+/* 地圖：黑框圓圈＋貼紙陰影；科目圈顏色＋右上角「生／理／化／地」字標（形狀已經用來表示難度，所以科目不再用形狀） */
+.map .node.s-bio { --node-ring: var(--subj-bio); --subj-ink: var(--subj-bio-ink); }
+.map .node.s-phy { --node-ring: var(--subj-phy); --subj-ink: var(--subj-phy-ink); }
+.map .node.s-chem { --node-ring: var(--subj-chem); --subj-ink: var(--subj-chem-ink); }
+.map .node.s-earth { --node-ring: var(--subj-earth); --subj-ink: var(--subj-earth-ink); }
+.map .node { box-shadow: 0 0 0 3px var(--ink), 0 6px 0 3px var(--ink); }
+.map .node.lock { box-shadow: 0 0 0 3px var(--lock-ring), 0 5px 0 3px var(--lock-ring); }
+.map .node:not(.lock)::after { position: absolute; right: -12px; top: -12px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--node-ring); color: var(--subj-ink, #fff); font-size: 16px; font-weight: 800; line-height: 1; }
+.map .node.s-bio:not(.lock)::after { content: "生"; }
+.map .node.s-phy:not(.lock)::after { content: "理"; }
+.map .node.s-chem:not(.lock)::after { content: "化"; }
+.map .node.s-earth:not(.lock)::after { content: "地"; }
+.map .chapter { border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.map-page .map-top { border-bottom: 3px solid var(--ink); }
+
+/* 星星：金色加黑色描邊（漫畫風）；地圖右上角星星總數用深金色字 */
+.stars-hud i, .big-stars i, #sheetStars i, .mini-stars { -webkit-text-stroke: 1.2px var(--star-line); }
+.stars-hud i:not(.on), .big-stars i:not(.on), #sheetStars i.off, .mini-stars i { -webkit-text-stroke-color: var(--star-off-line); }
+.map-top #starTotal { color: var(--star-ink); }

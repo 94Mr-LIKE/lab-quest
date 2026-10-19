@@ -1,0 +1,127 @@
+/* P4「晴空大冒險」（P3 進化 A）：從晴天一路玩到星空——地圖每一章換一個場景，按鈕、拉桿像糖果一樣按得下去 */
+:root {
+  --bg: #7cc8f2; --ink: #0f2436; --muted: #2c4458; --focus: #0f2436;
+  --card: #ffffff; --card-line: #cfe6f6; --shadow: 0 6px 0 rgba(13, 74, 120, .20);
+  --scene-line: #ffffff; --scene-bg: #effaff; --scene-drop: #fff1dc;
+  --line: #5f90b8; --btn: #eef7fd; --item: #eef7fd; --item-ink: #0f2436;
+  --primary: #ff9a2a; --primary-ink: #1f1300;
+  --accent: #b04a00; --accent-soft: rgba(255, 154, 42, .45);
+  --badge: #e2f0fa; --badge-ink: #0f2436; --hot: #ffe2c7; --hot-ink: #983c00; --boil: #d3ebfb; --boil-ink: #0b4d88; --ok: #1d7a3e;
+  --goal-bg: #eaf6fe; --goal-ink: #0f2436; --goal-chip: #0f2436; --goal-chip-ink: #ffffff;
+  --log-bg: #eef7fd; --ok-bg: #e0f4e5; --warn-bg: #fff3c9; --hint-bg: #e7eefc; --warn-ink: #a1450a; --stop: #c62828;
+  --out-bg: #ffffff; --star: #ffbb1c; --star-off: #f0f5fa;
+}
+.lab-svg .table { stroke: #c98f45; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .slot { fill: none; stroke: #e06d00; stroke-width: 2.5; stroke-dasharray: 7 6; opacity: .65; }
+.scene.drop-ready .lab-svg .slot { opacity: 1; stroke-width: 3.5; }
+.lab-svg .metal { fill: #6f8396; }
+.lab-svg .rod { stroke: #6f8396; stroke-width: 5; stroke-linecap: round; }
+.lab-svg .rod.thin { stroke-width: 3.5; }
+.lab-svg .leg { stroke: #4a5d70; stroke-width: 5; stroke-linecap: round; fill: none; }
+.lab-svg .mesh { fill: #eef3f7; stroke: #7d8ea0; stroke-width: 1.5; }
+.lab-svg .mesh-core { fill: #f2b56b; }
+.lab-svg .lamp-body { fill: #e3f4fd; stroke: #22506f; stroke-width: 2.4; }
+.lab-svg .wick { stroke: #333333; stroke-width: 2.5; }
+.lab-svg .flame-out { fill: #ff8f1f; stroke: #d0410f; stroke-width: 1.4; }
+.lab-svg .flame-in { fill: #2f7bff; }
+.lab-svg .glass { fill: rgba(190, 228, 250, .35); stroke: #22506f; stroke-width: 2.8; stroke-linejoin: round; }
+.lab-svg .grad { stroke: #0f3a57; stroke-width: 1.8; }
+.lab-svg .water { fill: #5cc8f5; }
+.lab-svg .bubbles circle { fill: #ffffff; stroke: #1f86c9; stroke-width: 1.4; }
+.lab-svg .ice rect { fill: #f4fdff; stroke: #4fb0dc; stroke-width: 1.6; }
+.lab-svg .steam { transition: opacity .6s; }
+.lab-svg .steam-p { fill: none; stroke: #9fb4c6; stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 5 7; animation: steam 1.4s linear infinite; }
+@keyframes steam { to { stroke-dashoffset: -24; } }
+.lab-svg .tglass { fill: #ffffff; stroke: #22506f; stroke-width: 1.8; }
+.lab-svg .tbulb, .lab-svg .tcol { fill: #e53935; }
+.lab-svg .chip { fill: #dff5e6; stroke: #1d7a3e; stroke-width: 1.5; }
+.lab-svg .chip-t { fill: #15602f; font-size: 15px; font-weight: 700; }
+
+/* 關卡地圖 */
+:root { --path: #ff9a2a; --path-under: rgba(255, 255, 255, .70); --node: #ffffff; --node-ring: #2c4458; --node-ink: #0f2436; --node-shadow: rgba(13, 58, 94, .38); --lock: #e9f1f7; --lock-ring: #b7cbdb; --lock-shadow: #8eaac0; --lock-ink: #5d7387; }
+/* 每一章一個場景（地圖由下往上走）：第 1 章晴空 → 第 2 章草原 → 第 3 章沙灘 → 第 4 章黃昏 → 第 5 章星空 */
+.band0 { background: #a9dcf7; }
+.band1 { background: #74c463; }
+.band2 { background: #fbe7b0; }
+.band3 { background: linear-gradient(to top, #f7a66b, #e3768f); }
+.band4 { background: radial-gradient(circle, rgba(255, 255, 255, .9) 1.3px, transparent 1.8px) 0 0 / 37px 41px, radial-gradient(circle, rgba(255, 255, 255, .55) 1px, transparent 1.5px) 13px 19px / 53px 47px, #1e3a6e; }
+
+/* ===== 以下是這套配色的延伸設定（不影響上面的必備變數；不要可以整段刪掉） ===== */
+
+:root {
+  /* 四科顏色（和 P1、P3 相同；深淺刻意拉開：生物、化學最深，物理、地科中等——紅綠色盲看得出深淺） */
+  --subj-bio: #0f5a24; --subj-phy: #3a88ee; --subj-chem: #8a1c74; --subj-earth: #a7851d;
+  --subj-bio-ink: #ffffff; --subj-phy-ink: #111820; --subj-chem-ink: #ffffff; --subj-earth-ink: #111820;
+  --star-ink: #5c3b00; --star-off-line: #8fa7ba;
+  /* 糖果按鈕的厚底邊、拉桿 */
+  --btn-edge: #5f90b8; --primary-edge: #c45f00;
+  --range-track: #dcecf8; --range-line: #5f90b8; --range-thumb: #ff9a2a; --range-thumb-ring: #c45f00;
+  /* 道具格依用途分底色（名稱一定寫在格子裡，顏色只是輔助）：容器、測量、加熱、安全、材料 */
+  --tile-glass: #d3ebfc; --tile-glass-edge: #8fbfe3;
+  --tile-measure: #ffefa0; --tile-measure-edge: #d9b93a;
+  --tile-fire: #ffd2ad; --tile-fire-edge: #eda066;
+  --tile-safe: #c8ecd2; --tile-safe-edge: #7fc797;
+  --tile-stuff: #f3f3f3; --tile-stuff-edge: #aab4bf;
+  /* 安全訊息：喊停底色、提示記號 */
+  --stop-bg: #ffe3df; --hint-icon: #1f5fbf;
+}
+
+/* 卡片像遊戲裡的面板：圓一點、底下一條實心陰影 */
+.card { border-radius: 24px; }
+.scene { background-image: linear-gradient(to top, #f6dfb8 0 6.2%, transparent 6.2%); }
+
+/* 糖果按鈕：底部深色厚邊，按下去會沉下去 */
+.btn, .step, .hint-btn { box-shadow: 0 5px 0 var(--btn-edge); transition: transform .06s, box-shadow .06s; }
+.btn.primary { box-shadow: 0 5px 0 var(--primary-edge); }
+.btn:not(:disabled):active, .step:active, .hint-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--btn-edge); }
+.btn.primary:not(:disabled):active { box-shadow: 0 1px 0 var(--primary-edge); }
+.btn:disabled { box-shadow: none; }
+#sheetGo { box-shadow: 0 5px 0 var(--primary-edge); }
+#sheetGo:not(:disabled):active { transform: translateY(4px); box-shadow: 0 1px 0 var(--primary-edge); }
+
+/* 拉桿：大顆橘色把手（Firefox 會自動顯示「已拉過」的填色；Chrome、Safari 要等程式在拉桿上設定 --fill 百分比才會有，沒設定時就是一條軌道） */
+input[type=range] { -webkit-appearance: none; appearance: none; height: 44px; background: transparent; }
+input[type=range]::-webkit-slider-runnable-track { height: 14px; border-radius: 7px; background: linear-gradient(to right, var(--accent) var(--fill, 0%), var(--range-track) var(--fill, 0%)); border: 2px solid var(--range-line); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 34px; height: 34px; margin-top: -12px; border-radius: 50%; background: var(--range-thumb); border: 3px solid #ffffff; box-shadow: 0 0 0 2px var(--range-thumb-ring), 0 4px 0 2px var(--range-thumb-ring); }
+input[type=range]::-moz-range-track { height: 14px; border-radius: 7px; background: var(--range-track); border: 2px solid var(--range-line); }
+input[type=range]::-moz-range-progress { height: 14px; border-radius: 7px; background: var(--accent); }
+input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 50%; background: var(--range-thumb); border: 3px solid #ffffff; box-shadow: 0 0 0 2px var(--range-thumb-ring), 0 4px 0 2px var(--range-thumb-ring); }
+input[type=range]:disabled::-webkit-slider-thumb { background: #c9d6e0; box-shadow: 0 0 0 2px #8ea3b5; }
+input[type=range]:disabled::-moz-range-thumb { background: #c9d6e0; box-shadow: 0 0 0 2px #8ea3b5; }
+
+/* 道具格依用途分底色（正式版建議由程式加 data-kind，就不用在這裡一個一個列） */
+.tray .item { background: var(--tile, var(--item)); box-shadow: 0 4px 0 var(--tile-edge, var(--btn-edge)); }
+.tray .item[data-item="beaker"], .tray .item[data-item="cylinder"] { --tile: var(--tile-glass); --tile-edge: var(--tile-glass-edge); }
+.tray .item[data-item="thermo"] { --tile: var(--tile-measure); --tile-edge: var(--tile-measure-edge); }
+.tray .item[data-item="lamp"], .tray .item[data-item="igniter"], .tray .item[data-item="cap"] { --tile: var(--tile-fire); --tile-edge: var(--tile-fire-edge); }
+.tray .item[data-item="goggles"] { --tile: var(--tile-safe); --tile-edge: var(--tile-safe-edge); }
+.tray .item[data-item="ice"] { --tile: var(--tile-stuff); --tile-edge: var(--tile-stuff-edge); }
+.tray .item.used { box-shadow: none; }
+
+/* 安全記號：不只靠顏色（喊停＝紅圈斜線、提醒＝黃色三角形、成功＝綠色打勾、提示＝藍色 i；形狀照國際安全標誌） */
+.stop-title::before { content: ""; display: inline-block; width: 1.05em; height: 1.05em; margin-right: 8px; vertical-align: -0.16em; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9.6' fill='white' stroke='%23c62828' stroke-width='3.2'/%3E%3Cpath d='M5.4 5.4 18.6 18.6' stroke='%23c62828' stroke-width='3.2'/%3E%3C/svg%3E") center / contain no-repeat; }
+.log.ok, .log.warn, .log.stop, .log.hint { padding-left: 46px; background-repeat: no-repeat; background-position: 12px 11px; background-size: 24px 24px; }
+.log.stop { background-color: var(--stop-bg); border-left: 6px solid var(--stop); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9.6' fill='white' stroke='%23c62828' stroke-width='3.2'/%3E%3Cpath d='M5.4 5.4 18.6 18.6' stroke='%23c62828' stroke-width='3.2'/%3E%3C/svg%3E"); }
+.log.warn { border-left: 6px solid #d99a00; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.8 22.6 21H1.4Z' fill='%23ffd23f' stroke='%23111' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12 9.2v5.6' stroke='%23111' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='17.8' r='1.5' fill='%23111'/%3E%3C/svg%3E"); }
+.log.ok { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231d7a3e'/%3E%3Cpath d='M6.6 12.4l3.6 3.6 7.4-7.8' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.log.hint { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231f5fbf'/%3E%3Ccircle cx='12' cy='7' r='1.8' fill='white'/%3E%3Cpath d='M12 10.8v7' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"); }
+.slider output.warn { background: var(--warn-bg); }
+.badge.done::before { content: "✓ "; }
+
+/* 地圖：科目圈顏色＋右上角「生／理／化／地」字標（形狀已經用來表示難度：挑戰、修正型是圓角方形，所以科目不再用形狀） */
+.map .node.s-bio { --node-ring: var(--subj-bio); --subj-ink: var(--subj-bio-ink); }
+.map .node.s-phy { --node-ring: var(--subj-phy); --subj-ink: var(--subj-phy-ink); }
+.map .node.s-chem { --node-ring: var(--subj-chem); --subj-ink: var(--subj-chem-ink); }
+.map .node.s-earth { --node-ring: var(--subj-earth); --subj-ink: var(--subj-earth-ink); }
+.map .node { box-shadow: 0 6px 0 var(--node-shadow); }
+.map .node:not(.lock)::after { position: absolute; right: -11px; top: -11px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--node); background: var(--node-ring); color: var(--subj-ink, #fff); font-size: 16px; font-weight: 800; line-height: 1; }
+.map .node.s-bio:not(.lock)::after { content: "生"; }
+.map .node.s-phy:not(.lock)::after { content: "理"; }
+.map .node.s-chem:not(.lock)::after { content: "化"; }
+.map .node.s-earth:not(.lock)::after { content: "地"; }
+.map .chapter { border: 0; box-shadow: 0 5px 0 rgba(13, 58, 94, .25); }
+
+/* 星星：金色加深色外框；沒拿到的星星用淺框 */
+.stars-hud i, .big-stars i, #sheetStars i, .mini-stars { -webkit-text-stroke: 1px var(--star-ink); }
+.stars-hud i:not(.on), .big-stars i:not(.on), #sheetStars i.off, .mini-stars i { -webkit-text-stroke-color: var(--star-off-line); }
+.map-top #starTotal { color: var(--star-ink); }

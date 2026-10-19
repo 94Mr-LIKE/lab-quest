@@ -1,0 +1,46 @@
+/* 任務關額外樣式（版面沿用 common/base.css，顏色沿用配色檔） */
+.top .diff { padding: 4px 12px; border-radius: 10px; background: var(--primary); color: var(--primary-ink); font-weight: 800; font-size: 15px; }
+.mission { margin: 0 0 12px; padding: 12px 14px; border-radius: 14px; background: var(--goal-bg); border: 2px solid var(--accent); }
+.mission b { display: inline-block; margin-bottom: 4px; padding: 1px 10px; border-radius: 8px; background: var(--goal-chip); color: var(--goal-chip-ink); font-size: 14px; }
+.mission p { margin: 2px 0 4px; font-size: 18px; font-weight: 700; }
+.mission small { color: var(--muted); font-size: 14px; }
+.fail-ico { display: flex; justify-content: center; margin: 4px 0 8px; }
+.sheet.fail h2 { color: var(--stop); text-align: center; font-size: 26px; }
+.sheet.fail p { text-align: center; }
+#resTitle { text-align: center; }
+#resText { text-align: center; font-size: 17px; }
+.data { width: 100%; margin: 6px 0 12px; border-collapse: collapse; font-size: 15px; }
+.data th, .data td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.data th { color: var(--muted); font-weight: 600; }
+.data td.hit { color: var(--ok); font-weight: 800; }
+.ctl-note { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+.slider[aria-disabled="true"] { opacity: .45; }
+a.btn { display: inline-flex; align-items: center; justify-content: center; color: var(--ink); text-decoration: none; }
+a.btn.primary { color: var(--primary-ink); }
+
+/* 危險失敗：誇張版（老闆 10/19：危險圖示要更誇張）
+   畫面閃紅兩下、卡片和背後的實驗畫面一起震、爆炸鋸齒彈出、液滴往外噴、標題放大砸下來；不畫人受傷。
+   閃紅只有兩下、約 1 秒，低於「每秒不超過 3 次閃光」的無障礙上限；系統設定「減少動態效果」時只留靜態圖。 */
+.overlay.danger { background: rgba(110, 8, 18, .74); }
+.sheet.fail { position: relative; border: 4px solid #1d2a36; padding-top: 30px; }
+.sheet.fail::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: repeating-linear-gradient(-45deg, #ffd23f 0 14px, #1d2a36 14px 28px); }
+.sheet.fail h2 { font-size: 34px; font-weight: 900; letter-spacing: .06em; }
+.fail-ico svg.dz { width: min(220px, 58vw); height: auto; overflow: visible; }
+.dz .drop, .dz .burst, .dz .spray { transform-box: fill-box; transform-origin: center; }
+.dz .spray { transform-origin: 50% 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .overlay.danger.show { animation: dzFlash .95s ease-out 1 both; }
+  .overlay.danger.show .sheet { animation: dzShake .6s cubic-bezier(.36, .07, .19, .97) .05s 1 both; }
+  .overlay.danger.show .burst { animation: dzPop .5s cubic-bezier(.16, 1, .3, 1) both; }
+  .overlay.danger.show .spray { animation: dzSpray .45s ease-out .08s both; }
+  .overlay.danger.show .drop { animation: dzFly .75s cubic-bezier(.15, .8, .3, 1) .12s both; }
+  .overlay.danger.show h2 { animation: dzJolt .5s ease-out .15s both; }
+  body.dz-quake .app > :not(.overlay) { animation: dzQuake .5s linear 1; }
+}
+@keyframes dzFlash { 0% { background: rgba(229, 72, 77, .96); } 20% { background: rgba(110, 8, 18, .6); } 40% { background: rgba(229, 72, 77, .9); } 100% { background: rgba(110, 8, 18, .74); } }
+@keyframes dzShake { 0%, 100% { transform: none; } 15% { transform: translate(-14px, 4px) rotate(-3deg); } 30% { transform: translate(12px, -4px) rotate(2.5deg); } 45% { transform: translate(-9px, 3px) rotate(-1.5deg); } 60% { transform: translate(7px, -2px) rotate(1deg); } 75% { transform: translate(-4px, 1px); } }
+@keyframes dzPop { 0% { transform: scale(.2) rotate(-25deg); opacity: 0; } 70% { transform: scale(1.18) rotate(5deg); opacity: 1; } 100% { transform: none; } }
+@keyframes dzSpray { 0% { transform: scale(.6, .1); } 70% { transform: scale(1.05, 1.15); } 100% { transform: none; } }
+@keyframes dzFly { 0% { transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -1)) scale(.2); opacity: 0; } 30% { opacity: 1; } 100% { transform: none; } }
+@keyframes dzJolt { 0% { transform: scale(2.4); opacity: 0; } 60% { transform: scale(.92); opacity: 1; } 100% { transform: none; } }
+@keyframes dzQuake { 0%, 100% { transform: none; } 20% { transform: translate(-7px, 3px); } 40% { transform: translate(7px, -3px); } 60% { transform: translate(-4px, 2px); } 80% { transform: translate(3px, -1px); } }

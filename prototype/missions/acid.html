@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>瘋狂實驗室｜配出 2.0 M 鹽酸</title>
+<link rel="stylesheet" href="../common/base.css">
+<link rel="stylesheet" href="../palettes/p6.css" id="themeCss">
+<script>
+  /* 配色試看：網址加 ?palette=p1～p9；換頁後會記住；?palette=off 換回原本的 */
+  (function () {
+    var m = /[?&]palette=(p[1-9]|off)/.exec(location.search), p;
+    try { if (m) sessionStorage.setItem("labPalette", m[1]); p = sessionStorage.getItem("labPalette"); } catch (e) { p = m && m[1]; }
+    if (p && p !== "off") document.getElementById("themeCss").href = "../palettes/" + p + ".css";
+  })();
+</script>
+<link rel="stylesheet" href="missions.css">
+</head>
+<body>
+<div class="app" id="app"></div>
+<script src="../common/records.js"></script>
+<script src="shell.js"></script>
+<script src="acid.js"></script>
+</body>
+</html>

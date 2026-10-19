@@ -3,25 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>實驗闖關（開發中）</title>
+<title>瘋狂實驗室（開發中）</title>
 <style>
-  body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: #eef1f4; color: #1d2a36; line-height: 1.7; }
-  main { max-width: 640px; margin: 0 auto; padding: 32px 18px 48px; }
-  h1 { margin: 0 0 6px; font-size: 28px; }
-  p { margin: 6px 0 16px; color: #3f4a56; }
-  a.go { display: block; margin: 18px 0; padding: 18px 20px; border-radius: 18px; background: #16324a; color: #fff; text-decoration: none; font-size: 20px; font-weight: 700; text-align: center; }
-  a.go:focus-visible { outline: 3px solid #e2762b; outline-offset: 3px; }
-  .note { font-size: 15px; color: #4f5866; }
-  .count { font-size: 18px; font-weight: 700; color: #16324a; }
-  a.go2 { display: block; margin: 0 0 18px; padding: 14px 20px; border-radius: 18px; border: 2px solid #16324a; color: #16324a; text-decoration: none; font-size: 18px; font-weight: 700; text-align: center; }
+  body { margin: 0; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: #0f1b26; color: #f1ece2; line-height: 1.7; }
+  main { max-width: 640px; margin: 0 auto; padding: 36px 18px 48px; }
+  h1 { margin: 0; font-size: 40px; font-weight: 900; letter-spacing: .06em; line-height: 1.15; }
+  .rule { width: 56px; height: 4px; margin: 14px 0; border-radius: 2px; background: #f2b544; }
+  p { margin: 6px 0 16px; color: #c9c3b6; }
+  a.go { display: block; margin: 18px 0 12px; padding: 16px 20px; border-radius: 14px; background: #f2b544; color: #14202b; text-decoration: none; font-size: 20px; font-weight: 900; letter-spacing: .1em; text-align: center; }
+  a.go2 { display: block; margin: 0 0 12px; padding: 13px 20px; border-radius: 14px; border: 1.5px solid #5d6b78; color: #f1ece2; text-decoration: none; font-size: 17px; font-weight: 700; text-align: center; }
+  a.go:focus-visible, a.go2:focus-visible { outline: 3px solid #f2b544; outline-offset: 3px; }
+  .note { font-size: 15px; color: #a7a195; }
+  .count { font-size: 17px; font-weight: 700; color: #f2b544; }
 </style>
 </head>
 <body>
 <main>
-  <h1>實驗闖關</h1>
-  <p>國小到高中的自然科實驗闖關遊戲，正在開發中。</p>
+  <h1>瘋狂實驗室</h1>
+  <div class="rule"></div>
+  <p>國小到高中的自然科實驗解謎遊戲，正在開發中。每一關給你一個目標，自己挑器材、決定數量和順序，把實驗做成功。</p>
   <p class="count" id="playerCount" hidden></p>
   <a class="go" href="prototype/">試玩原型</a>
+  <a class="go2" href="prototype/cover/index.html">看封面（三個方向）</a>
   <a class="go2" href="prototype/records.html">我的紀錄</a>
   <p class="note">這是電腦裡的模擬實驗室。真的要做實驗時，一定要在學校實驗室、有老師在旁邊才可以做。本網站不收集任何個人資料。</p>
 </main>
