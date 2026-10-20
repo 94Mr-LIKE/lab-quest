@@ -549,9 +549,27 @@
   // 紀錄卡、工具列只給大約的量（精確的要自己讀刻度）：20 mL 以下到 1 mL，以上到 5 mL
   function approx(v) { return v < 0.05 ? '空的' : v < 0.95 ? '幾滴' : '約 ' + (v < 20 ? Math.round(v) : Math.round(v / 5) * 5) + ' mL'; }
   function nameOf(it) { if (it.props.reagent && CM.REAGENTS[it.props.reagent] && (it.type === 'bottle' || it.type === 'naoh')) return CM.REAGENTS[it.props.reagent].name; return TY[it.type].name; }
-  function pourA0(it) { return (1 - Math.min(1, it.sol.v / capOf(it))) * 95; }   // 傾斜超過這個角度才開始倒（裝越滿越早）
-  function pourRate(it) { return clamp((it.tilt - pourA0(it)) * TY[it.type].rate, 0, 30); }   // 傾斜越多倒越快
-  function restTilt(it) { return TY[it.type].kind === 'paper' ? 0 : clamp(pourA0(it) - 8, 0, 70); }   // 架在杯口時先斜靠著、還不會倒
+  // 傾斜 tilt 度時，容器裡的水面在世界座標的高度（跟 drawLiquid 用同一套：剖面面積守恆）
+  function surfaceAt(it, tilt) {
+    var shape = shapeOf(it), inner = interiorLocal(shape), lvl = CM.levelOf(shape, it.sol.v), target = area(clipBelow(inner, lvl));
+    var keep = it.tilt; it.tilt = tilt;
+    var w = inner.map(function (p) { return toWorld(it, p); }); it.tilt = keep;
+    var lo = Math.min.apply(null, w.map(function (p) { return p.y; })), hi = Math.max.apply(null, w.map(function (p) { return p.y; }));
+    for (var k = 0; k < 24; k++) { var mid = (lo + hi) / 2; if (area(clipBelow(w, mid)) < target) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+  // 水面剛好碰到瓶口的傾斜角：超過這個角度才會流出來（瓶口就是轉軸，傾斜時位置不變）
+  function pourA0(it) {
+    if (!it.sol || it.sol.v <= 0.02) return 179;
+    var key = it.type + ':' + Math.round(it.sol.v * 4) + ':' + (it.dock && it.dock.dir || 1), c = pourA0.cache || (pourA0.cache = {});
+    if (c[key] != null) return c[key];
+    var lip = it.y + HH(it) - 0.05, lo = 0, hi = 179;
+    if (surfaceAt(it, 0) >= lip) { c[key] = 0; return 0; }
+    for (var i = 0; i < 16; i++) { var mid = (lo + hi) / 2; if (surfaceAt(it, mid) >= lip) hi = mid; else lo = mid; }
+    c[key] = hi; return hi;
+  }
+  function pourRate(it) { return clamp((it.tilt - pourA0(it)) * TY[it.type].rate, 0, 30); }   // 水面超過瓶口越多，流得越快
+  function restTilt(it) { if (TY[it.type].kind === 'paper') return 0; if (!it.sol || it.sol.v <= 0.05) return 30; return clamp(pourA0(it) - 8, 0, 100); }   // 架在杯口時先斜靠著、水面還沒到瓶口
   function step(dt) {
     S.t += dt;
     S.items.forEach(function (it) {
@@ -571,10 +589,12 @@
             it._holdT = (it._holdT || 0) + dt;
             var want = it._holdPour ? Math.min(30, 3 + it._holdT * 9) : Math.min(15, Math.max(1.5, it._pourLeft * 3)), amt = want * dt;
             if (!it._holdPour) amt = Math.min(amt, it._pourLeft);
-            var mvF = move(it, d, amt, 'pour'); it._rate = mvF / dt;
-            it.tilt = Math.min(125, Math.max(it.tilt - 120 * dt, pourA0(it) + 6 + want * 1.6));
-            if (!it._holdPour) { it._pourLeft = mvF > 1e-9 ? it._pourLeft - mvF : 0; if (it._pourLeft <= 1e-6) { it._pourLeft = 0; it._holdT = 0; it.tilt = restTilt(it); endSession(); } }
-            if (mvF <= 1e-9 && !it._emptyWarn) { it._emptyWarn = true; toast(nameOf(it) + '倒不出來了（倒光了）'); }
+            var need = Math.min(172, pourA0(it) + 4 + want * 1.2);   // 水面先到瓶口，再多轉一點才有這個流量
+            it.tilt = it.tilt < need ? Math.min(need, it.tilt + 160 * dt) : Math.max(need, it.tilt - 120 * dt);
+            var mvF = it.tilt > pourA0(it) + 0.5 ? move(it, d, Math.min(amt, pourRate(it) * dt * 4 + 0.01), 'pour') : 0; it._rate = mvF / dt;   // 水面還沒到瓶口：一滴都不流
+            var drained = it.tilt >= 171 || it.sol.v <= film(it) + 1e-6;   // 倒光了：倒到底，或只剩管壁殘液
+            if (!it._holdPour) { if (mvF > 1e-9) it._pourLeft -= mvF; else if (drained) it._pourLeft = 0; if (it._pourLeft <= 1e-6) { it._pourLeft = 0; it._holdT = 0; it.tilt = restTilt(it); endSession(); } }
+            if (mvF <= 1e-9 && drained && !it._emptyWarn) { it._emptyWarn = true; toast(nameOf(it) + '倒不出來了（倒光了）'); }
             if (mvF > 0 && Math.random() < dt * 3) sfx('pour');
           } else {
             var r = pourRate(it);
@@ -706,7 +726,7 @@
       if (!drag.moved) { drag.moved = true; undock(it); it._held = true; it._rack = false; if (TY[it.type].kind === 'pipette' || TY[it.type].kind === 'rod' || TY[it.type].kind === 'spatula') { drag.dx = 0; drag.dy = -4; } sfx('item_pick'); }
       it.x = p.x + drag.dx; it.y = Math.max(0, p.y + drag.dy); return;
     }
-    if (drag.kind === 'pour') { it.tilt = clamp(drag.t0 + (drag.y0 - p.y) * 9, 0, 125); return; }
+    if (drag.kind === 'pour') { it.tilt = clamp(drag.t0 + (drag.y0 - p.y) * 9, 0, 170); return; }
     if (drag.kind === 'bulb') { var dy = p.y - drag.y; drag.y = p.y; pipetteBy(it, dy * 0.8); return; }
     if (drag.kind === 'cock') { var o = clamp(drag.o0 + (p.x - drag.x0) * 0.4, 0, 1); if (Math.abs(p.x - drag.x0) > 0.2) drag.moved = true; it.props.open = Math.round(o * 20) / 20; return; }
     if (drag.kind === 'stir') { if (Math.abs(p.x - drag.x) > 0.25) { var c2 = byUid(it.dock.to); if (c2) { c2._stir = 0.5; if (!c2._stirLogged) { c2._stirLogged = true; logStep('用玻璃棒攪拌' + nameOf(c2)); } } drag.x = p.x; it.x = clamp(p.x, c2.x - 1.2, c2.x + 1.2); } }

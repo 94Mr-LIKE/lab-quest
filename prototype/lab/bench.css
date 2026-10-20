@@ -142,3 +142,66 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .brief .goal b { margin-right: 6px; color: #b0412e; }
 .sheet .say { margin: 6px 0 10px; padding: 8px 10px; border-radius: 8px; background: #fff7d6; font-weight: 800; }
 .sheet .learn.bonus { border-color: #ffd84d; }
+
+/* ---------- 生活物理挑戰（sport.html）：任務列下面是操作列，不放器材櫃 ---------- */
+.sport .app { grid-template-rows: auto auto auto 1fr; }
+.ctrlbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 10px 6px; padding: 6px 8px; border: 2px solid #13233f; border-radius: 8px; background: #fff; }
+.ctrlbar .cg { display: flex; align-items: center; gap: 4px; }
+.ctrlbar .cl { font-size: 13px; font-weight: 900; color: #46546b; margin-right: 2px; }
+.ctrlbar .cv { min-width: 76px; text-align: center; font-weight: 900; font-variant-numeric: tabular-nums; }
+.ctrlbar button { min-width: 40px; min-height: 38px; padding: 0 10px; border-radius: 6px; border: 1.5px solid #13233f; background: #fff; font-weight: 900; touch-action: manipulation; }
+.ctrlbar button.on { background: #dcebff; }
+.ctrlbar button.go { margin-left: auto; min-width: 84px; background: #ff6a55; font-size: 16px; }
+.sport .data { top: 8px; bottom: auto; left: 8px; right: auto; max-width: min(420px, 60%); font-size: 12.5px; }
+.sheet .learn.src { font-size: 12px; color: #46546b; }
+/* 生活物理挑戰用遊戲感的深色介面（老闆 10/20：「畫面好看一點，這是遊戲...不是學校測驗」） */
+body.sport { background: radial-gradient(120% 90% at 50% 0%, #1f3557 0%, #0d1a30 60%, #081120 100%); color: #eef3fb; }
+.sport .back { color: #fff; }
+.sport .stage { color: #9fb3cf; }
+.sport .bar h1 { color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
+.sport .icon-btn { background: #1b2c48; border-color: #4a6690; color: #fff; }
+.sport .icon-btn[aria-pressed="false"] { color: #7f93b3; }
+.sport .diff { background: #ffd84d; border-color: #ffd84d; }
+.sport .shots i { background: radial-gradient(circle at 35% 30%, #ffe08a 0 15%, #ff9a3c 45%, #b4521a 100%); border-color: #0b1528; }
+.sport .mission { background: rgba(255, 255, 255, .07); border-color: #3a5277; }
+.sport .mission p { color: #e9f0fa; }
+.sport .mission .more { background: #1b2c48; color: #fff; border-color: #4a6690; }
+.sport .mission .how { color: #c9d6ea; }
+.sport .ctrlbar { background: rgba(9, 18, 34, .92); border-color: #3a5277; }
+.sport .ctrlbar .cl { color: #9fb3cf; }
+.sport .ctrlbar .cv { color: #ffd84d; font-size: 16px; }
+.sport .ctrlbar .cv.wind { color: #7ce0ff; }
+.sport .ctrlbar button { background: #1b2c48; color: #fff; border-color: #4a6690; }
+.sport .ctrlbar button:active { background: #2a4370; }
+.sport .ctrlbar button.on { background: #ffd84d; color: #13233f; border-color: #ffd84d; }
+.sport .ctrlbar button.go { background: linear-gradient(180deg, #ff8a5c, #f0502e); color: #fff; border-color: #ffb08a; font-size: 18px; letter-spacing: .12em; text-shadow: 0 1px 0 rgba(0, 0, 0, .3); animation: goPulse 1.8s ease-in-out infinite; }
+@keyframes goPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 106, 85, .55); } 50% { box-shadow: 0 0 0 7px rgba(255, 106, 85, 0); } }
+@media (prefers-reduced-motion: reduce) { .sport .ctrlbar button.go { animation: none; } }
+.sport .stage-wrap { border-color: #3a5277; background: #0d1a30; box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+.sport .data { background: rgba(9, 18, 34, .86); color: #eef3fb; border-color: #3a5277; }
+.sport .data .hit { color: #5dffa0; }
+.sport .data .miss { color: #ff9a8a; }
+.sport .toast { background: rgba(255, 216, 77, .97); color: #13233f; }
+.sport :focus-visible { outline-color: #ffd84d; }
+.sport.arch .data { left: 22%; max-width: min(420px, 50%); }
+.sport .sheet { color: #13233f; }   /* 結果卡是白底，不要繼承深色介面的白字 */
+.sheet .how-brief { margin: 8px 0 0; font-size: 13px; line-height: 1.55; text-align: left; color: #2c3a52; }
+.icon-btn.brief-btn { display: none; font-size: 14px; }
+.sheet table.ph { width: 100%; border-collapse: collapse; font-size: 12.5px; }   /* 生活化學：各樣品的 pH 與出處 */
+.sheet table.ph th, .sheet table.ph td { padding: 3px 4px; border-bottom: 1px solid #d5dce3; text-align: left; vertical-align: top; }
+.sheet table.ph td:nth-child(2) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.life .ctrlbar .cv.state { min-width: 0; font-size: 13px; color: #fff; }
+@media (max-width: 600px) {   /* 手機直放：次數小圓點縮小、排兩行，關卡名稱才放得下 */
+  .sport .shots { flex-wrap: wrap; gap: 2px; max-width: 58px; }
+  .sport .shots i { width: 9px; height: 9px; border-width: 1px; }
+}
+@media (orientation: landscape) and (max-height: 560px) {
+  .sport .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto 1fr; }
+  .sport .stage-wrap { grid-column: 1; grid-row: 4; margin-left: 10px; }
+  /* 手機橫放：任務列收起來（開場的委託單已經看過全文，標題列的「任務」可以再看），提示框放到上方中間，實驗台大一點 */
+  .sport .mission { display: none; }
+  .sport .icon-btn.brief-btn { display: inline-grid; }
+  .sport .toast { top: 8px; bottom: auto; left: 50%; right: auto; transform: translateX(-50%); max-width: 70%; }
+  .ctrlbar { padding: 3px 6px; margin-bottom: 4px; } .ctrlbar button { min-height: 36px; }
+  .sport .data { max-width: 46%; font-size: 11.5px; }
+}

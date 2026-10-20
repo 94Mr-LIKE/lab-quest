@@ -8,7 +8,9 @@
 (function () {
   'use strict';
   var PH = window.LabPhysics, M = window.PhyModel, V = PH.V, D2R = M.D2R, LV = window.PHY_LEVELS;
-  var no = Math.max(1, Math.min(LV.length, parseInt(new URLSearchParams(location.search).get('lv'), 10) || 1));
+  var askLv = parseInt(new URLSearchParams(location.search).get('lv'), 10);
+  if (askLv === 4 || askLv === 5) { location.replace('sport.html?lv=' + (askLv + 1)); return; }   // 舊第 4、5 關（一發入魂、動量接力）10/20 改到生活物理第 5、6 關，舊連結直接轉過去
+  var no = Math.max(1, Math.min(LV.length, askLv || 1));
   var level = LV[no - 1], TRACK = level.track || null;
   function $(s) { return document.querySelector(s); }
   function sfx(n, d) { if (window.LabSfx) window.LabSfx.play(n, d); }

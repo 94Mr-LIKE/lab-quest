@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<title>瘋狂實驗室｜生活物理挑戰</title>
+<link rel="stylesheet" href="bench.css?v=1020b">
+</head>
+<body class="sport">
+<div class="app" id="app">
+  <header class="bar">
+    <a class="back" href="index.html" aria-label="回關卡列表">‹</a>
+    <div class="titles"><span class="stage" id="stage"></span><h1 id="title"></h1></div>
+    <div class="shots" id="shots" aria-label="剩下的次數"></div>
+    <span class="diff" id="diff"></span>
+    <button class="icon-btn brief-btn" type="button" id="btnBrief" aria-label="再看一次任務">任務</button>
+    <button class="icon-btn" type="button" id="btnSfx" aria-label="音效"></button>
+  </header>
+  <section class="mission" id="mission">
+    <b>任務</b><p id="missionText"></p>
+    <button class="more" type="button" id="btnHow" aria-expanded="false">怎麼操作</button>
+    <p class="how" id="howText" hidden></p>
+  </section>
+  <div class="ctrlbar" id="ctrlbar"></div>
+  <main class="stage-wrap" id="stageWrap">
+    <canvas id="cv" aria-label="挑戰畫面：拖住球往後拉可以瞄準"></canvas>
+    <div class="data" id="data" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="rotate-tip" aria-hidden="true">手機橫放，畫面會大很多</div>
+  </main>
+</div>
+<div class="overlay" id="ov"><div class="sheet" id="sheet"></div></div>
+<script src="../common/records.js?v=1020b"></script>
+<script src="../common/sfx.js?v=1020b"></script>
+<script src="sport-sim.js?v=1020b"></script>
+<script src="sport-levels.js?v=1020b"></script>
+<script src="sport-game.js?v=1020b"></script>
+</body>
+</html>

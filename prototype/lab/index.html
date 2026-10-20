@@ -21,12 +21,20 @@
   .back { color: #13233f; font-weight: 800; }
   h2 { margin: 26px 0 2px; font-size: 21px; font-weight: 900; }
   .chem .no { background: #b0412e; }
+  .sport .no { background: #e8641e; }
+  .life .no { background: #2fa36b; }
 </style>
 </head>
 <body>
 <main>
   <a class="back" href="../index.html">‹ 原型首頁</a>
   <h1>實驗台關卡</h1>
+  <h2>生活物理挑戰</h2>
+  <p>罰球空心、走廊彈力球、夜市打靶、70 公尺射箭、決賽一發入魂、軌道車停車格：生活裡的物理，全部照真的公式算（拋體、空氣阻力、碰撞、摩擦、側風）。出手點固定，靠你算角度、速度、選對球。</p>
+  <div id="sportList" class="sport"></div>
+  <h2>生活化學挑戰</h2>
+  <p>家裡的瓶瓶罐罐也是化學：用石蕊試紙分酸鹼、用廣用試紙和 pH 計比一比哪瓶洗面乳的 pH 最接近皮膚。滴管、電極換樣品前要洗。</p>
+  <div id="lifeList" class="life"></div>
   <h2>物理實驗台</h2>
   <p>真的物理：球會照拋體、碰撞、滾動、槓桿、空氣阻力來動。器材自己擺、自己轉，次數有限。</p>
   <div id="list"></div>
@@ -34,9 +42,11 @@
   <p>操作學 nobook：容器拖到另一個容器的瓶口放手會架好，拖藍色圓鈕傾倒；吸量管、滴定管、洗瓶、電子秤都要自己操作、自己讀刻度。危險操作直接失敗。</p>
   <div id="chemList" class="chem"></div>
 </main>
-<script src="../common/records.js"></script>
-<script src="phy-levels.js"></script>
-<script src="chem-levels.js"></script>
+<script src="../common/records.js?v=1020b"></script>
+<script src="phy-levels.js?v=1020b"></script>
+<script src="chem-levels.js?v=1020b"></script>
+<script src="sport-levels.js?v=1020b"></script>
+<script src="life-levels.js?v=1020b"></script>
 <script>
   (function () {
     'use strict';
@@ -51,6 +61,8 @@
     }
     document.getElementById('list').innerHTML = cards(window.PHY_LEVELS, 'phy.html');
     document.getElementById('chemList').innerHTML = cards(window.CHEM_LEVELS, 'chem.html');
+    document.getElementById('sportList').innerHTML = cards(window.SPORT_LEVELS, 'sport.html');
+    document.getElementById('lifeList').innerHTML = cards(window.LIFE_LEVELS, 'life.html');
   })();
 </script>
 </body>

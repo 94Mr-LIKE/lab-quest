@@ -6,7 +6,8 @@
 (function () {
   'use strict';
   var NAMES = ['ui_tap', 'item_pick', 'item_place', 'slider_tick', 'action', 'pass', 'star1', 'star2', 'star3', 'miss',
-    'danger', 'warn', 'reset', 'unlock', 'pour', 'splash', 'stir', 'shake', 'bubble', 'ball_roll', 'ball_land', 'cup_hit'];
+    'danger', 'warn', 'reset', 'unlock', 'pour', 'splash', 'stir', 'shake', 'bubble', 'ball_roll', 'ball_land', 'cup_hit',
+    'swish', 'rim', 'board', 'bell', 'arrow_hit', 'whoosh', 'pop'];
   var script = document.currentScript;
   var BASE = script && script.src ? script.src.replace(/common\/sfx\.js(\?.*)?$/, 'sfx/') : 'sfx/';
   var useWebAudio = /^https?:/.test(location.protocol) && !!(window.AudioContext || window.webkitAudioContext);
