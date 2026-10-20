@@ -130,3 +130,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .chem .mission .toolbar .chip { padding: 0 2px; font-size: 13px; }
 }
 .submit { max-height: 56px; }
+.toolbar button.to { background: #dcebff; }
+.toolbar button.hold { touch-action: none; }
+.toolbar button.hold:active { background: #e0452e; color: #fff; }
+/* 委託單（每關開場） */
+.brief .tag { display: inline-block; padding: 2px 10px; border-radius: 5px; background: #ffd84d; border: 1.5px solid #13233f; font-size: 13px; font-weight: 900; }
+.brief h2 { margin: 8px 0 0; font-size: 26px; }
+.brief .topic { margin: 2px 0 8px; color: #46546b; font-size: 13px; font-weight: 700; }
+.brief .story { list-style: none; margin: 0 0 10px; padding: 0; font-size: 16px; line-height: 1.65; }
+.brief .goal { padding: 8px 10px; border: 1.5px solid #13233f; border-radius: 6px; background: #fff3ef; font-size: 14px; line-height: 1.55; }
+.brief .goal b { margin-right: 6px; color: #b0412e; }
+.sheet .say { margin: 6px 0 10px; padding: 8px 10px; border-radius: 8px; background: #fff7d6; font-weight: 800; }
+.sheet .learn.bonus { border-color: #ffd84d; }

@@ -147,12 +147,15 @@
   // ---------- 一發的追蹤：最高點、落點、有沒有進杯 ----------
   function Tracker(env, ball, opts) {
     this.env = env; this.ball = ball; this.t = 0; this.maxY = ball.p.y; this.inCup = 0;
-    this.hit = false; this.done = false; this.land = null; this.cupT = (opts && opts.cupT) || 0.35; this.maxT = (opts && opts.maxT) || 9;
+    this.hit = false; this.done = false; this.land = null; this.cupT = (opts && opts.cupT) || 0.35; this.maxT = (opts && opts.maxT) || 8;
+    this.waitT = (opts && opts.waitT) || this.maxT;   // 等被拋起來的時間上限（翹翹板沒把球拋起來就早點結束）
+    this.restT = (opts && opts.restT) || 0.6;
+    this.cupTop = env.cups.length ? Math.min.apply(null, env.cups.map(function (c) { return c.sensor ? c.sensor.y0 : 0; })) : -1e9;
     this.started = !(opts && opts.waitLaunch);
   }
   Tracker.prototype.update = function (dt) {
     var b = this.ball; this.t += dt;
-    if (!this.started) { if (Math.hypot(b.v.x, b.v.y) > 3) this.started = true; else { if (this.t > this.maxT) this.done = true; return; } }
+    if (!this.started) { if (Math.hypot(b.v.x, b.v.y) > 3) this.started = true; else { if (this.t > this.waitT) this.done = true; return; } }
     if (b.alive) {
       this.maxY = Math.max(this.maxY, b.p.y);
       if (!this.land && b.touching && this.t > 0.05) this.land = V(b.p.x, b.p.y);
@@ -160,7 +163,10 @@
       this.inCup = inside ? this.inCup + dt : 0;
       if (this.inCup >= this.cupT) { this.hit = true; this.done = true; return; }
     }
-    if (!b.alive || b.rest > 0.6 || this.t > this.maxT) this.done = true;
+    // 能量上限：現在的高度＋v²÷2g 低於最低的杯子，再怎麼彈也上不去，這一發可以提早結束
+    var g = 98, reach = b.p.y + (b.v.x * b.v.x + b.v.y * b.v.y) / (2 * g);
+    if (b.alive && this.t > 0.3 && b.v.y < 0 && reach < this.cupTop) this.done = true;
+    if (!b.alive || b.rest > this.restT || this.t > this.maxT) this.done = true;
   };
 
   // ---------- 氣墊軌道（第 5 關）：一維碰撞 ----------

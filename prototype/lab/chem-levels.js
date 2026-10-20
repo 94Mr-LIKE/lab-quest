@@ -4,15 +4,16 @@
   'use strict';
   root.CHEM_LEVELS = [
     {
-      id: 'CHEM-1', no: 1, stage: '國二 理化・溶液與濃度', diff: 'E3', title: '配 100 g 的 10% 食鹽水',
-      mission: '配出 100 g、重量百分濃度 10% 的食鹽水（誤差 ±0.3%），食鹽要全部溶解。配好按「交給老師」。',
+      id: 'CHEM-1', no: 1, stage: '國二 理化・溶液與濃度', diff: 'E3', title: "打翻的對照組", topic: "配 100 g 的 10% 食鹽水",
+      story: ["科展隊的鹽度感測器，明早八點要給評審看。", "已知濃度的樣品卻打翻了：100 g、10% 的食鹽水。", "評審會驗，誤差只能在 ±0.3% 以內。"], win: "感測器讀數跟你的樣品對上了。評審問是誰配的，我們說：夜班。", fail: "濃度的分母是「整杯溶液」，不是只有水。還有，罐子長得像，不代表裝的就是鹽。", bonus: "評審問：只有一台秤，配得出來嗎？挑戰：不用量筒，水也用電子秤秤，濃度誤差 ±0.1% 以內。",
+      mission: "配出 100 g（±2 g）、重量百分濃度 10% 的食鹽水，誤差 ±0.3%（9.7%～10.3%），食鹽要全部溶解。配好後交件。",
       note: '把稱量紙拖到電子秤上、按「歸零」；藥匙拖進食鹽罐挖一匙，再拖到紙上方倒一點。水可以用量筒量（把水瓶拖到量筒邊緣，拖藍色圓鈕倒水），也可以把燒杯放在秤上直接秤。玻璃棒拖進燒杯攪拌。',
-      world: { w: 46, h: 22 },
+      world: { w: 64, h: 22 },
       fixed: [
-        { type: 'saltjar', x: 3.8 },
-        { type: 'balance', x: 15 },
-        { type: 'beaker250', x: 29 },
-        { type: 'bottle', x: 40, props: { reagent: 'water', vol: 320 } }
+        { type: 'saltjar', x: 4 },
+        { type: 'balance', x: 17 },
+        { type: 'beaker250', x: 33 },
+        { type: 'bottle', x: 59, props: { reagent: 'water', vol: 320 } }
       ],
       shelf: { paper: 1, spatula: 1, cyl100: 1, rod: 1, sugarjar: 1, beaker100: 1 },
       eval: 'saltwater',
@@ -20,15 +21,16 @@
       learn: '重量百分濃度 ＝ 溶質質量 ÷（溶質＋溶劑）質量 × 100%。100 g 的 10% 食鹽水要 10 g 食鹽、90 g 水。水的密度約 1 g/mL，90 g 水就是 90 mL。用量筒時，視線要和凹液面最低點同高；燒杯上的刻度只是大約，不能拿來精確量體積。'
     },
     {
-      id: 'CHEM-2', no: 2, stage: '高中基礎化學・溶液的濃度', diff: 'E4', title: '配 100 mL 的 2.0 mol/L 鹽酸',
+      id: 'CHEM-2', no: 2, stage: '高中基礎化學・溶液的濃度', diff: 'E4', title: "濃鹽酸馴服術", topic: "配 100 mL 的 2.0 mol/L 鹽酸",
+      story: ["地質調查隊天亮出發，要帶稀鹽酸去野外驗石灰岩。", "架上只剩濃鹽酸：37.0%、密度 1.19 g/mL。", "他們要 100 mL、2.0 mol/L。先算，再動手。"], win: "標籤上寫 2.0 mol/L，我們信。", fail: "先算這瓶濃鹽酸本身是幾 mol/L：1 L 有多重、HCl 佔幾成、再除以分子量。稀釋前後，HCl 的莫耳數不變。", bonus: "調查隊加訂一瓶備用。挑戰：用同一瓶濃鹽酸，再配 100 mL、1.0 mol/L 的稀鹽酸（±0.05 mol/L）。",
       mission: '用濃鹽酸試藥（37.0%、密度 1.19 g/mL、分子量 36.46）配出 100 mL、2.0 mol/L 的稀鹽酸（±0.1 mol/L）。先算好要取幾 mL。',
       note: '先點器材櫃的護目鏡、手套戴上（紀錄卡第一行會打勾）。吸量管拖進試劑瓶，拖上面的紅色吸球往上＝吸、往下＝放；選取時右上角放大鏡可以讀刻度：吸量管的刻度 0 在上面、20 在下面，液面停在 5.0 表示管內有 20 − 5.0 = 15.0 mL。洗瓶拖到容器上方，按住藍色圓鈕擠水。容量瓶要加到刻度線、蓋瓶塞、倒轉搖勻。',
-      world: { w: 46, h: 26 },
+      world: { w: 62, h: 26 },
       fixed: [
         { type: 'bottle', x: 4.5, props: { reagent: 'concHCl', vol: 300 } },
-        { type: 'washer', x: 41.5, props: { reagent: 'water', vol: 330 } },
-        { type: 'beaker250', x: 16 },
-        { type: 'vol100', x: 28 }
+        { type: 'washer', x: 57, props: { reagent: 'water', vol: 330 } },
+        { type: 'beaker250', x: 17 },
+        { type: 'vol100', x: 30 }
       ],
       shelf: { goggles: 1, gloves: 1, pipette: 1, rod: 1, stopper: 1, cyl50: 1, jug: 1, naoh: 1, lamp: 1 },
       ppe: true,
@@ -37,15 +39,16 @@
       learn: '① 濃鹽酸濃度：1 L 重 1.19 × 1000 = 1190 g，HCl 佔 37.0% 是 440.3 g，÷ 36.46 = 12.08 mol，所以是 12.08 mol/L。② 要配 0.100 L × 2.0 mol/L = 0.200 mol。③ 0.200 ÷ 12.08 = 0.01656 L，取 16.6 mL。稀釋濃酸一定要「酸加入水」；燒杯倒完要用純水潤洗 2～3 次一起倒進容量瓶，最後加水到刻度線、倒轉搖勻。'
     },
     {
-      id: 'CHEM-3', no: 3, stage: '高中選修化學・酸鹼滴定', diff: 'E5', title: '滴定出未知鹽酸的濃度',
-      mission: '用 0.100 mol/L 的 NaOH 標準溶液滴定 20.00 mL 未知濃度的鹽酸，算出它的濃度（誤差 ±2%），填進答案。滴過頭也會失敗。',
+      id: 'CHEM-3', no: 3, stage: '高中選修化學・酸鹼滴定', diff: 'E5', title: "無名之瓶", topic: "滴定出未知鹽酸的濃度",
+      story: ["倉庫漏水，一瓶鹽酸的標籤泡爛了，只剩「HCl」。", "不知道濃度，就不能用，也不能隨便處理。", "用 0.100 mol/L NaOH 滴定，找回它的名字。"], win: "新標籤印好了，上面是你算出來的數字。這瓶終於有名字了。", fail: "中和點時，HCl 和 NaOH 的莫耳數相等。檢查滴定前後兩個讀數（0 在上面）；接近終點時，一滴、搖一搖、再看。", bonus: "K 的規矩：標籤上的數字要做兩次才算數。挑戰：同一瓶再滴定一次，兩次 NaOH 用量相差 0.10 mL 以內。",
+      mission: "用 0.100 mol/L 的 NaOH 標準溶液滴定 20.00 mL 未知濃度的鹽酸，算出它的濃度（誤差 ±2%），填進答案。滴過頭（多滴超過 0.30 mL）也會失敗。",
       note: '吸量管取 20.00 mL 未知鹽酸（吸到刻度 0 就是 20.00 mL）放進錐形瓶，加 2 滴酚酞。錐形瓶拖到滴定管下方。拖滴定管的活栓（藍色把手）往右＝打開、越右越快；點一下活栓＝一滴。錐形瓶要「搖晃」混合。滴定前、後都要從放大鏡讀滴定管刻度（0 在上面）。',
-      world: { w: 46, h: 49 },
+      world: { w: 62, h: 49 },
       fixed: [
         { type: 'bottle', x: 4.5, props: { reagent: 'unkHCl', vol: 300 } },
         { type: 'phpbottle', x: 12.5 },
         { type: 'burette', x: 28, props: { reagent: 'NaOH01' } },
-        { type: 'washer', x: 41.5, props: { reagent: 'water', vol: 330 } }
+        { type: 'washer', x: 57, props: { reagent: 'water', vol: 330 } }
       ],
       shelf: { pipette: 1, conical: 1, cyl50: 1, beaker250: 1 },
       eval: 'titration',

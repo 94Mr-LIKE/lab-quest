@@ -21,7 +21,7 @@
   var W = 0, H = 0, DPR = 1;
   var cam = { x: level.world.w / 2, y: 0, s: 10, fit: 10, user: false };
   var view = { s: 10, cx: 0, cy: 0, ox: 0, oy: 0 };
-  var S = { items: [], sel: null, over: false, ppe: { goggles: false, gloves: false }, log: [], traps: {}, fx: [], uid: 0, t: 0,
+  var S = { spAmt: 5, items: [], sel: null, over: false, ppe: { goggles: false, gloves: false }, log: [], traps: {}, fx: [], uid: 0, t: 0,
     unkC: 0.08 + Math.random() * 0.07, acidBy: null, rinses: 0, beakerToFlask: 0, washSinceTransfer: false, session: null };
   S.unkC = Math.round(S.unkC * 10000) / 10000;
   var TRAPS = { 1: ['sugarjar', 'beaker100'], 2: ['cyl50', 'jug', 'naoh', 'lamp'], 3: ['cyl50'] }[no] || [];
@@ -90,28 +90,37 @@
   function boxOf(it) {   // 點選用的範圍（世界座標，直立時）
     var k = TY[it.type].kind, s;
     if (k === 'cont' || k === 'washer') { s = shapeOf(it); CM.shapeTable(s); var r = Math.max(s.base || 0, s.segs.reduce(function (m, g) { return Math.max(m, g[1], g[2]); }, 0)); return { x0: it.x - r - 0.4, x1: it.x + r + 0.4, y0: it.y, y1: it.y + s.H + (k === 'washer' ? 4 : 0.4) }; }
-    if (lying(it)) { var L2 = toolLen(it) / 2; return { x0: it.x - L2, x1: it.x + L2, y0: 0, y1: 1.4 }; }
     if (k === 'pipette') return { x0: it.x - 0.9, x1: it.x + 0.9, y0: it.y, y1: it.y + PIPE.len + 2.6 };
     if (k === 'rod') return { x0: it.x - 0.7, x1: it.x + 0.7, y0: it.y, y1: it.y + 20 };
     if (k === 'stopper') return { x0: it.x - 1.2, x1: it.x + 1.2, y0: it.y, y1: it.y + 2 };
     if (k === 'paper') return { x0: it.x - 3.2, x1: it.x + 3.2, y0: it.y, y1: it.y + 1.2 };
-    if (k === 'spatula') return { x0: it.x - 1, x1: it.x + 1, y0: it.y, y1: it.y + 16 };
-    if (k === 'jar') return { x0: it.x - 3.2, x1: it.x + 3.2, y0: it.y, y1: it.y + 8.5 };
+    if (k === 'spatula') return it._rack && !it.dock ? { x0: it.x - 1.0, x1: it.x + 1.0, y0: it.y, y1: it.y + 15.6 } : { x0: it.x - 1.2, x1: it.x + 3.2, y0: it.y, y1: it.y + 15.6 };
+    if (k === 'jar') return { x0: it.x - 3.3, x1: it.x + 3.3, y0: it.y, y1: it.y + 9.6 };
     if (k === 'balance') return { x0: it.x - 7, x1: it.x + 7, y0: 0, y1: PAN_Y + 0.4 };
     if (k === 'burette') return { x0: it.x - 1.6, x1: it.x + 1.6, y0: BUR.tip - 1.5, y1: BUR.g0 + 4 };
     if (k === 'dropbottle') return { x0: it.x - 2, x1: it.x + 2, y0: it.y, y1: it.y + 9 };
     if (k === 'lamp') return { x0: it.x - 3, x1: it.x + 3, y0: it.y, y1: it.y + 8 };
     return { x0: it.x - 2, x1: it.x + 2, y0: it.y, y1: it.y + 4 };
   }
-  // 沒在用的吸量管、玻璃棒、藥匙平躺在桌上（不會擋住其他器材）；拿起來或插進容器時才直立
-  function lying(it) { var k = TY[it.type].kind; return (k === 'pipette' || k === 'rod' || k === 'spatula') && !it.dock && !it._held; }
-  function toolLen(it) { var k = TY[it.type].kind; return k === 'pipette' ? PIPE.len + 2.4 : k === 'rod' ? 20 : 15.5; }
+  // 工具架的位置：桌上固定器材之間最寬、最靠右的空位
+  var RACK = (function () {
+    var occ = S.items.map(function (it) { var b = boxOf(it); return [b.x0 - 0.5, b.x1 + 0.5]; });
+    for (var x = level.world.w - 4.5; x >= 4.5; x -= 0.5) { if (!occ.some(function (o) { return x - 4.0 < o[1] && o[0] < x + 4.0; })) return { x: x, slots: 4 }; }
+    return { x: level.world.w - 4.5, slots: 4 };
+  })();
+  function drawRack() {
+    var x0 = RACK.x - 3.8, x1 = RACK.x + 3.8;
+    shadowOn(3); rrect(x0, 0, x1, 2.6, 0.3); fs('#8a5a32', '#0b1528', 1.2); shadowOff();
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; for (var i = 0; i < RACK.slots; i++) ctx.fillRect(RACK.x - 2.7 + i * 1.8 - 0.35, 2.2, 0.7, 0.4);
+    label(RACK.x, 1.2, '工具架', { size: 9, color: '#fff6e8', weight: 900, inset: true });
+  }
   function inBox(p, b, pad) { pad = pad || 0; return p.x >= b.x0 - pad && p.x <= b.x1 + pad && p.y >= b.y0 - pad && p.y <= b.y1 + pad; }
 
   // ---------- 鏡頭 ----------
   function lockMissionHeight() {   // 任務列和工具列輪流出現時高度不變，實驗台才不會上下跳
     var m = $('#mission'); if (!m || m.classList.contains('tool')) return;
-    m.style.minHeight = ''; m.style.minHeight = Math.max(52, m.offsetHeight) + 'px';
+    var port = window.matchMedia && window.matchMedia('(orientation: portrait)').matches;   // 直式：預留工具列三行的高度，選器材時版面不跳
+    m.style.minHeight = ''; m.style.minHeight = Math.max(port ? 140 : 52, m.offsetHeight) + 'px';
   }
   function resize() {
     lockMissionHeight();
@@ -300,12 +309,22 @@
   // 吸量管裡有 v mL 時，液面在刻度「20 − v」的位置（0 刻度在上、20 刻度在下；20 刻度以下的管尖不算）
   function pipeY(it, v) { return it.y + PIPE.g20 + (PIPE.g0 - PIPE.g20) * v / 20; }
   function drawRod(it) {
-    var a = it.dock ? 0.12 : 0.25, top = P(it.x + Math.sin(a) * 20, it.y + Math.cos(a) * 20);
+    var a = it.dock ? 0.12 : it._rack ? 0.02 : 0.25, top = P(it.x + Math.sin(a) * 20, it.y + Math.cos(a) * 20);
     ctx.strokeStyle = 'rgba(240,248,255,.95)'; ctx.lineWidth = Math.max(px(3), 0.35); ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(it.x, it.y + 0.2); ctx.lineTo(top.x, top.y); ctx.stroke(); ctx.lineCap = 'butt';
     ctx.strokeStyle = '#0b1528'; ctx.lineWidth = px(0.8); ctx.stroke();
   }
+  // GPT 重畫的器材圖（老闆 10/20：挖食鹽的圖重做）
+  var IMG = {};
+  ['salt_jar', 'spatula', 'spatula_salt'].forEach(function (n) { var im = new Image(); im.src = 'img/' + n + '.png'; IMG[n] = im; });
+  function sprite(n) { var im = IMG[n]; return im && im.complete && im.naturalWidth ? im : null; }
+  function drawSprite(im, x, y, w, h, ang) {   // (x, y)＝圖的底邊中點（世界座標），ang＝逆時針弧度
+    ctx.save(); ctx.translate(x, y); if (ang) ctx.rotate(ang); ctx.scale(1, -1); ctx.drawImage(im, -w / 2, -h, w, h); ctx.restore();
+  }
+  var SPAT = { len: 15.5, ang: -0.176 };   // 藥匙長 15.5 cm、直立時往右斜 10°
   function drawSpatula(it) {
+    var sp = sprite(it.props.g > 0.01 ? 'spatula_salt' : 'spatula');
+    if (sp) { drawSprite(sp, it.x, it.y + 0.1, SPAT.len * sp.naturalWidth / sp.naturalHeight, SPAT.len, it._rack && !it.dock ? 0 : SPAT.ang); return; }
     var top = P(it.x + 2.5, it.y + 15);
     ctx.strokeStyle = '#c9d2dc'; ctx.lineWidth = Math.max(px(4), 0.4); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(it.x, it.y + 1); ctx.lineTo(top.x, top.y); ctx.stroke(); ctx.lineCap = 'butt';
     ctx.strokeStyle = '#0b1528'; ctx.lineWidth = px(0.8); ctx.stroke();
@@ -324,6 +343,13 @@
     if (it.props.g > 0.005) { ctx.fillStyle = it.props.solid === 'sugar' ? '#fff3dc' : '#ffffff'; ctx.strokeStyle = 'rgba(19,35,63,.5)'; ctx.lineWidth = px(0.8); ctx.beginPath(); var h = Math.min(1.6, 0.3 + Math.sqrt(it.props.g) * 0.4), w = Math.min(2.4, 0.6 + Math.sqrt(it.props.g) * 0.5); ctx.moveTo(it.x - w, it.y + 0.35); ctx.quadraticCurveTo(it.x, it.y + 0.35 + h * 2, it.x + w, it.y + 0.35); ctx.closePath(); ctx.fill(); ctx.stroke(); }
   }
   function drawJar(it) {
+    var jar = sprite('salt_jar');
+    if (jar) {   // 罐子是 GPT 畫的；標籤文字由程式寫（砂糖罐也長得一樣：要看標籤，這就是陷阱）
+      var jw = 6.6, jh = jw * jar.naturalHeight / jar.naturalWidth; shadowOn(5); drawSprite(jar, it.x, it.y, jw, jh, 0); shadowOff();
+      label(it.x, it.y + jh * 0.43, TY[it.type].solid === 'sugar' ? '砂糖' : '氯化鈉', { size: 11, color: '#13233f', weight: 900, inset: true });
+      label(it.x, it.y + jh * 0.355, TY[it.type].solid === 'sugar' ? 'C₁₂H₂₂O₁₁' : 'NaCl', { size: 9.5, color: '#13233f', weight: 700, inset: true });
+      return;
+    }
     shadowOn(5); rrect(it.x - 3, it.y, it.x + 3, it.y + 7, 0.6); fs('rgba(225,240,255,.3)', null); shadowOff();
     ctx.fillStyle = TY[it.type].solid === 'sugar' ? '#fff3dc' : '#ffffff'; ctx.fillRect(it.x - 2.8, it.y + 0.2, 5.6, 3.6);
     rrect(it.x - 3, it.y, it.x + 3, it.y + 7, 0.6); fs(null, '#0b1528', 1.4);
@@ -385,17 +411,8 @@
   }
   function drawStopper(it) { path([P(it.x - 0.9, it.y), P(it.x + 0.9, it.y), P(it.x + 1.1, it.y + 1.4), P(it.x - 1.1, it.y + 1.4)]); fs('#e9eef4', '#0b1528', 1.2); }
 
-  function drawLying(it) {
-    var k = TY[it.type].kind, L = toolLen(it), x0 = it.x - L / 2, y = 0.45;
-    shadowOn(3);
-    if (k === 'pipette') { rrect(x0 + 2.2, y - 0.3, x0 + L, y + 0.3, 0.2); fs('rgba(230,242,255,.55)', '#0b1528', 1); if (it.sol.v > 0.01) { ctx.fillStyle = solColor(it); ctx.fillRect(x0 + L - 0.2 - (L - 2.4) * Math.min(1, it.sol.v / 24), y - 0.22, (L - 2.4) * Math.min(1, it.sol.v / 24), 0.44); } ctx.fillStyle = '#d63b2f'; ctx.beginPath(); ctx.ellipse(x0 + 1.1, y + 0.2, 1.2, 0.7, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#0b1528'; ctx.lineWidth = px(1); ctx.stroke(); }
-    else if (k === 'rod') { rrect(x0, y - 0.18, x0 + L, y + 0.18, 0.18); fs('rgba(240,248,255,.9)', '#0b1528', 0.9); }
-    else { rrect(x0 + 1.6, y - 0.2, x0 + L, y + 0.2, 0.2); fs('#c9d2dc', '#0b1528', 0.9); ctx.beginPath(); ctx.ellipse(x0 + 0.9, y + 0.05, 0.9, 0.5, 0, 0, 7); fs('#c9d2dc', '#0b1528', 0.9); }
-    shadowOff();
-  }
   function drawItem(it) {
     var k = TY[it.type].kind;
-    if (lying(it)) return drawLying(it);
     if (k === 'cont' || k === 'washer') drawGlass(it);
     else if (k === 'pipette') { drawPipette(it); if (S.sel === it || it.dock) knob(P(it.x, it.y + PIPE.len + 1.1), 'rgba(0,0,0,0)', 'bulb'); }
     else if (k === 'rod') drawRod(it);
@@ -415,8 +432,18 @@
       if (it.dock && it.dock.mode === 'pour') { from = lipWorld(it); var d = byUid(it.dock.to); to = P(d.x, d.y + Math.max(0.5, CM.levelOf(shapeOf(d), d.sol.v))); }
       else if (it.dock && it.dock.mode === 'over' && TY[it.type].kind === 'washer') { from = washerNozzle(it); var d2 = byUid(it.dock.to); to = P(d2.x, d2.y + Math.max(0.5, CM.levelOf(shapeOf(d2), d2.sol.v))); }
       else return;
-      ctx.strokeStyle = 'rgba(200,228,255,.85)'; ctx.lineWidth = Math.max(px(2), Math.min(0.7, 0.08 + rate * 0.03)); ctx.lineCap = 'round';
+      ctx.strokeStyle = solColor(it).replace(/[\d.]+\)$/, '.9)'); ctx.lineWidth = Math.max(px(2.5), Math.min(0.7, 0.08 + rate * 0.03)); ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.quadraticCurveTo(from.x + (to.x - from.x) * 0.15, from.y, to.x, to.y); ctx.stroke(); ctx.lineCap = 'butt';
+    });
+  }
+  function drawLive() {
+    S.items.forEach(function (it) {
+      if (!it.dock || !(it._shown > 0.004)) return;
+      var k = TY[it.type].kind, at;
+      if (it.dock.mode === 'pour' && k === 'cont') at = lipWorld(it);
+      else if (it.dock.mode === 'over' && k === 'washer') at = washerNozzle(it);
+      else return;
+      label(at.x, at.y + 1.6, (k === 'washer' ? '已擠 ' : '已倒 ') + (it._shown < 10 ? f2(it._shown) : f1(it._shown)) + ' mL', { size: 14, color: '#ffd84d', weight: 900, stroke: '#13233f' });
     });
   }
   function drawFx() {
@@ -428,8 +455,9 @@
     labels = []; zoomDraw = !!isZoom;
     drawRoom();
     var order = S.items.slice().sort(function (a, b) { return zOf(a) - zOf(b); });
+    drawRack();
     order.forEach(drawItem);
-    drawStreams(); drawFx();
+    drawStreams(); drawFx(); if (!isZoom) drawLive();
     if (!isZoom && drag && drag.kind === 'move' && drag.moved) { var tg = pourTarget(drag.it); if (tg) { var bt = boxOf(tg); ctx.strokeStyle = '#ffd84d'; ctx.lineWidth = px(3); ctx.strokeRect(bt.x0 - 0.3, bt.y0 - 0.3, bt.x1 - bt.x0 + 0.6, bt.y1 - bt.y0 + 0.6); label(tg.x, bt.y1 + 1.4, '放手就架到這裡', { size: 12, color: '#ffd84d', weight: 900, stroke: '#13233f' }); } }
     if (!isZoom && S.sel) { var b = boxOf(S.sel), si = S.sel; ctx.setLineDash([px(6), px(4)]); ctx.strokeStyle = '#fff'; ctx.lineWidth = px(2); path([[b.x0 - 0.3, b.y0 - 0.3], [b.x1 + 0.3, b.y0 - 0.3], [b.x1 + 0.3, b.y1 + 0.3], [b.x0 - 0.3, b.y1 + 0.3]].map(function (q) { return toWorld(si, P(q[0] - si.x, q[1] - si.y)); })); ctx.stroke(); ctx.setLineDash([]); }
     flushLabels(isZoom);
@@ -495,7 +523,8 @@
     var avail = Math.max(0, a.v - (how === 'pour' ? film(src) : 0));
     var v = Math.min(vol, avail); if (v <= 0) return 0;
     var moved = CM.transfer(a, d, v);
-    if (isCont(dst) && dst.sol.v > capOf(dst)) { var over = dst.sol.v - capOf(dst), lost = new CM.Sol(); CM.transfer(dst.sol, lost, over); toast('滿出來了！'); sfx('warn'); }
+    if (isCont(dst) && dst.sol.v > capOf(dst)) { var over = dst.sol.v - capOf(dst), lost = new CM.Sol(); CM.transfer(dst.sol, lost, over); src._pourLeft = 0; src._washLeft = 0; src._holdPour = false; src._squeeze = false; if (src.dock && src.dock.mode === 'pour') src.tilt = restTilt(src); if (!dst._fullWarn || S.t - dst._fullWarn > 2) { dst._fullWarn = S.t; toast(nameOf(dst) + '滿出來了！'); sfx('warn'); } }
+    if (src.dock && src.dock.to === dst.uid) src._shown = (src._shown || 0) + moved;
     if (S.session && S.session.src === src.uid && S.session.dst === dst.uid) S.session.v += moved;
     else { endSession(); S.session = { src: src.uid, dst: dst.uid, v: moved, how: how }; }
     trackSpecial(src, dst, how);
@@ -529,17 +558,34 @@
       it._rate = 0;
       if (it.flash > 0) it.flash -= dt * 1.2;
       if (it.dock && it.dock.mode === 'pour') {
-        if (!it._holdKnob) { var rt = restTilt(it); it.tilt = it.tilt > rt ? Math.max(rt, it.tilt - 140 * dt) : Math.min(rt, it.tilt + 90 * dt); }
+        var forced = it._holdPour || it._pourLeft > 0 || it._dumpAll;
+        if (!it._holdKnob && !forced) { var rt = restTilt(it); it.tilt = it.tilt > rt ? Math.max(rt, it.tilt - 140 * dt) : Math.min(rt, it.tilt + 90 * dt); }
         if (TY[it.type].kind === 'paper') {
           var dst = byUid(it.dock.to);
+          if (it._dumpAll) { it.tilt = Math.min(70, it.tilt + 160 * dt); if (it.props.g <= 0) it._dumpAll = false; }
           if (it.tilt > 35 && it.props.g > 0) { var g = Math.min(it.props.g, 15 * dt); if (it.props.g - g < 0.005) g = it.props.g; dst.sol.solid += g; dst.sol.solidKind = it.props.solid; it.props.g -= g; it._poured = (it._poured || 0) + g; if (it.props.solid === 'sugar') dst.sol.sugar = true; if (Math.random() < dt * 4) sfx('pour'); }
           if (it._poured > 0 && (it.props.g <= 0 || it.tilt <= 35)) { logStep('稱量紙上的' + (it.props.solid === 'sugar' ? '糖' : '食鹽') + ' ' + f2(it._poured) + ' g 倒進' + nameOf(dst)); it._poured = 0; }
         } else {
-          var r = pourRate(it);
-          if (r > 0) { var d = byUid(it.dock.to), mv = move(it, d, r * dt, 'pour'); it._rate = mv / dt; if (mv > 0 && Math.random() < dt * 3) sfx('pour'); }
+          var d = byUid(it.dock.to);
+          if (forced) {   // 按住倒／倒固定的量：越按越快（最快每秒 30 mL），傾斜角度跟著流量變
+            it._holdT = (it._holdT || 0) + dt;
+            var want = it._holdPour ? Math.min(30, 3 + it._holdT * 9) : Math.min(15, Math.max(1.5, it._pourLeft * 3)), amt = want * dt;
+            if (!it._holdPour) amt = Math.min(amt, it._pourLeft);
+            var mvF = move(it, d, amt, 'pour'); it._rate = mvF / dt;
+            it.tilt = Math.min(125, Math.max(it.tilt - 120 * dt, pourA0(it) + 6 + want * 1.6));
+            if (!it._holdPour) { it._pourLeft = mvF > 1e-9 ? it._pourLeft - mvF : 0; if (it._pourLeft <= 1e-6) { it._pourLeft = 0; it._holdT = 0; it.tilt = restTilt(it); endSession(); } }
+            if (mvF <= 1e-9 && !it._emptyWarn) { it._emptyWarn = true; toast(nameOf(it) + '倒不出來了（倒光了）'); }
+            if (mvF > 0 && Math.random() < dt * 3) sfx('pour');
+          } else {
+            var r = pourRate(it);
+            if (r > 0) { var mv = move(it, d, r * dt, 'pour'); it._rate = mv / dt; if (mv > 0 && Math.random() < dt * 3) sfx('pour'); }
+          }
         }
       }
-      if (TY[it.type].kind === 'washer' && it.dock && it._squeeze) { var d2 = byUid(it.dock.to), mv2 = move(it, d2, 4 * dt, 'wash'); it._rate = mv2 / dt; }
+      if (TY[it.type].kind === 'washer' && it.dock && (it._squeeze || it._washLeft > 0)) {
+        var d2 = byUid(it.dock.to), amt2 = it._squeeze ? 4 * dt : Math.min(it._washLeft, 6 * dt), mv2 = move(it, d2, amt2, 'wash'); it._rate = mv2 / dt;
+        if (!it._squeeze) { it._washLeft = mv2 > 1e-9 ? it._washLeft - mv2 : 0; if (it._washLeft <= 1e-6) { it._washLeft = 0; endSession(); } }
+      }
       if (it.type === 'burette' && it.props.open > 0) {
         var rate = it.props.open * it.props.open * 1.6, dv = Math.min(rate * dt, 50 - it.props.read);
         if (dv > 0) { it.props.read += dv; it._acc = (it._acc || 0) + dv; while (it._acc > 0.05) { it._acc -= 0.05; S.fx.push({ x: it.x, y: BUR.tip - 0.3, vx: 0, vy: -20, t: 0, life: 0.5, r: 0.18, c: 'rgba(200,228,255,.9)' }); } burDeliver(it, dv); }
@@ -616,9 +662,10 @@
     return P(it.x + pv.x + dx * c - dy * s, it.y + pv.y + dx * s + dy * c);
   }
   function itemAt(p) {
-    var order = S.items.slice().sort(function (a, b) { return zOf(b) - zOf(a); });
-    for (var i = 0; i < order.length; i++) if (inBox(unTilt(order[i], p), boxOf(order[i]), Math.max(0.2, 8 / cam.s))) return order[i];
-    return null;
+    // 點到好幾個時：先比前後（zOf），一樣前面的就選離手指最近的那個（工具架上並排的工具才分得開）
+    var best = null, bz = -1e9, bd = 1e9;
+    S.items.forEach(function (it) { var b = boxOf(it), q = unTilt(it, p); if (!inBox(q, b, Math.max(0.2, 8 / cam.s))) return; var z = zOf(it), d = inBox(q, b, 0) ? 0 : 1; d += Math.abs(q.x - (b.x0 + b.x1) / 2) / 100; if (z > bz || (z === bz && d < bd)) { best = it; bz = z; bd = d; } });
+    return best;
   }
   function select(it) { S.sel = it; buildToolbar(); }
   cv.addEventListener('pointerdown', function (e) {
@@ -656,7 +703,7 @@
     if (drag.kind === 'pan') { if (cam.s > cam.fit * 1.02) { cam.x = drag.cx - (sp.x - drag.sx) / cam.s; cam.y = drag.cy + (sp.y - drag.sy) / cam.s; cam.user = true; } return; }
     if (drag.kind === 'move') {
       if (!drag.moved && Math.hypot(p.x - drag.sx, p.y - drag.sy) < Math.max(0.3, 6 / cam.s)) return;   // 點一下只是選取，不拿起來
-      if (!drag.moved) { drag.moved = true; undock(it); it._held = true; if (TY[it.type].kind === 'pipette' || TY[it.type].kind === 'rod' || TY[it.type].kind === 'spatula') { drag.dx = 0; drag.dy = -4; } sfx('item_pick'); }
+      if (!drag.moved) { drag.moved = true; undock(it); it._held = true; it._rack = false; if (TY[it.type].kind === 'pipette' || TY[it.type].kind === 'rod' || TY[it.type].kind === 'spatula') { drag.dx = 0; drag.dy = -4; } sfx('item_pick'); }
       it.x = p.x + drag.dx; it.y = Math.max(0, p.y + drag.dy); return;
     }
     if (drag.kind === 'pour') { it.tilt = clamp(drag.t0 + (drag.y0 - p.y) * 9, 0, 125); return; }
@@ -668,7 +715,7 @@
     ptrs.delete(e.pointerId);
     var d = drag; drag = null; if (!d) return;
     var it = d.it;
-    if (d.kind === 'pour') { it._holdKnob = false; endSession(); }
+    if (d.kind === 'pour') { it._holdKnob = false; if (TY[it.type].kind !== 'paper') it.tilt = Math.min(it.tilt, restTilt(it)); endSession(); }
     if (d.kind === 'squeeze') { it._squeeze = false; if (Date.now() - d.t0 < 220 && it.dock) { var dst = byUid(it.dock.to); move(it, dst, 0.05, 'wash'); } endSession(); }
     if (d.kind === 'bulb') endSession();
     if (d.kind === 'cock' && !d.moved && Date.now() - d.t0 < 300) { if (d.o0 > 0) { it.props.open = 0; toast('活栓關上了'); } else oneDrop(it); }
@@ -685,7 +732,7 @@
   function undock(it) {
     if (!it.dock) return;
     if (it.dock.mode === 'stopper') { var f = byUid(it.dock.to); if (f) f.props.stopper = false; }
-    it.dock = null; it.tilt = 0; it._squeeze = false; endSession();
+    it.dock = null; it.tilt = 0; it._squeeze = false; it._pourLeft = 0; it._dumpAll = false; it._washLeft = 0; it._holdPour = false; endSession();
   }
   // 放手時決定放在哪裡（nobook 的「感應區」）
   function place(it, opts) {
@@ -703,14 +750,14 @@
       conts.forEach(function (t) { var top = t.y + HH(t); var dx = Math.abs((k === 'washer' ? it.x - 3.3 : it.x) - t.x); if (dx < shapeOf(t).mouth + 5 && it.y > top - 4 && it.y < top + 16) consider(t, dx); });
       if (best) {
         var top2 = best.y + HH(best);
-        if (k === 'washer') { var rT = CM.radiusAt(shapeOf(best), 0.2) + 0.15; it.x = best.x + rT + 3.4; it.y = best.y; it.dock = { mode: 'over', to: best.uid, nozzle: P(best.x, top2 + 1.0) }; toast('按住藍色圓鈕擠水；工具列可以擠一滴'); }
+        if (k === 'washer') { var rT = CM.radiusAt(shapeOf(best), 0.2) + 0.15; it.x = best.x + rT + 3.4; it.y = best.y; it.dock = { mode: 'over', to: best.uid, nozzle: P(best.x, top2 + 1.0) }; it._shown = 0; toast('按住藍色圓鈕擠水；工具列可以擠一滴'); }
         else { var busy = S.items.some(function (o) { return o.dock && o.dock.mode === 'tip' && o.dock.to === best.uid; }); it.x = best.x + (busy ? shapeOf(best).mouth * 0.7 : 0); it.y = top2 + 1.0; it.dock = { mode: 'over', to: best.uid }; toast('按「滴一滴」，或點紅色滴頭'); }   // 杯裡插著吸量管、玻璃棒時往旁邊挪，滴頭才不會跟吸球疊在一起
         sfx('item_place'); return;
       }
       return toBench(it);
     }
     if (k === 'pipette' || k === 'rod' || k === 'spatula') {
-      var targets = S.items.filter(function (i) { return i !== it && (isCont(i) || (k === 'spatula' && (TY[i.type].kind === 'jar' || TY[i.type].kind === 'paper'))); });
+      var targets = S.items.filter(function (i) { return i !== it && (isCont(i) || (k === 'spatula' && (TY[i.type].kind === 'jar' || TY[i.type].kind === 'paper'))) && !(i.dock && i.dock.mode === 'pour'); });
       targets.forEach(function (t) { var b = boxOf(t), dx = Math.abs(it.x - t.x); if (dx < (b.x1 - b.x0) / 2 + 1.5 && it.y < b.y1 + 6) consider(t, dx); });
       if (best) {
         if (k === 'pipette') {
@@ -720,8 +767,9 @@
         if (k === 'rod') { if (!isCont(best)) return toBench(it); it.x = best.x; it.y = best.y + 0.3; it.dock = { mode: 'tip', to: best.uid }; sfx('item_place'); toast('玻璃棒左右拖＝攪拌'); return; }
         if (k === 'spatula') {
           var kb = TY[best.type].kind;
-          if (kb === 'jar') { it.x = best.x; it.y = best.y + 3; it.dock = { mode: 'tip', to: best.uid }; sfx('item_place'); toast('按工具列「挖一匙」'); return; }
-          if (kb === 'paper') { it.x = best.x; it.y = best.y + 1.4; it.dock = { mode: 'over', to: best.uid }; sfx('item_place'); toast('按「抖一下」倒一點，「全倒」倒光'); return; }
+          if (kb === 'jar') { it.x = best.x; it.y = best.y + 3; it.dock = { mode: 'tip', to: best.uid }; sfx('item_place'); toast('先設定一匙幾克，再按「挖起」'); return; }
+          if (kb === 'paper') { it.x = best.x; it.y = best.y + 1.4; it.dock = { mode: 'over', to: best.uid }; sfx('item_place'); toast('按「全倒」倒光，「抖一點」倒一點'); return; }
+          if (kb === 'cont') { it.x = best.x; it.y = best.y + HH(best) + 0.8; it.dock = { mode: 'over', to: best.uid }; sfx('item_place'); toast('按「全倒」倒進去'); return; }
         }
       }
       return toBench(it);
@@ -748,7 +796,7 @@
   }
   function dockPour(it, t) {
     var dir = t.x >= it.x ? 1 : -1, sS = shapeOf(it), sT = shapeOf(t), topT = t.y + HH(t);
-    if (TY[it.type].kind === 'paper') { it.x = t.x - dir * (sT.mouth + 1.5); it.y = topT + 0.8; it.dock = { mode: 'pour', to: t.uid, dir: dir }; it.tilt = 0; sfx('item_place'); toast('拖藍色圓鈕往下，把紙上的東西倒進去'); return; }
+    if (TY[it.type].kind === 'paper') { it.x = t.x - dir * (sT.mouth + 1.5); it.y = topT + 0.8; it.dock = { mode: 'pour', to: t.uid, dir: dir }; it.tilt = 0; sfx('item_place'); toast('按「全倒」把紙上的東西倒進去'); return; }
     var lipY = Math.max(topT + 0.9, sS.H + 0.4), lipD = sT.mouth * 0.55;   // 高的瓶子不會沉到桌面下
     if (restTilt(it) < 25) {   // 裝很滿、不能先斜靠：整個瓶身放在目標旁邊，不要蓋住它（倒的時候水柱會畫成弧線流進去）
       var rS = Math.max(sS.base || 0, sS.segs.reduce(function (m, g) { return Math.max(m, g[1], g[2]); }, 0)), y0 = Math.max(0, lipY - sS.H - t.y), rT = 0;
@@ -756,16 +804,21 @@
       lipD = Math.max(lipD, rT + rS - sS.mouth + 0.25);
     }
     var lipX = t.x - dir * lipD;
+    it._shown = 0; it._emptyWarn = false;
     it.x = lipX - dir * sS.mouth; it.y = lipY - sS.H; it.dock = { mode: 'pour', to: t.uid, dir: dir }; it.tilt = restTilt(it);
-    sfx('item_place'); toast('架好了。拖藍色「傾倒」圓鈕往下，越多倒越快；放手就停');
+    sfx('item_place'); toast('架好了：按住「按住倒」就倒、放開就停；也可以按「倒 1 mL」「倒 10 mL」');
   }
   function toBench(it) {
     it.y = 0; it.dock = null; it.tilt = 0;
     var kk = TY[it.type].kind;
-    if (kk === 'pipette' || kk === 'rod' || kk === 'spatula') { var L2 = toolLen(it) / 2; it.x = clamp(it.x, L2, level.world.w - L2); sfx('item_place'); return; }
+    if (kk === 'pipette' || kk === 'rod' || kk === 'spatula') {   // 工具插回工具架的空格
+      var used = S.items.filter(function (o) { return o !== it && o._rack && !o.dock && !o._held; }).map(function (o) { return o._slot; });
+      var slot = 0; while (used.indexOf(slot) >= 0) slot++;
+      it._rack = true; it._slot = slot; it.x = RACK.x - 2.7 + Math.min(slot, RACK.slots - 1) * 1.8 + Math.max(0, slot - RACK.slots + 1) * 0.6; it.y = 0.5; sfx('item_place'); return;
+    }
     var w = boxOf(it), half = (w.x1 - w.x0) / 2, x0 = clamp(it.x, half - 1, level.world.w - half + 1);
     // 找最近的空位，不要跟桌上別的器材疊在一起
-    function free(x) { it.x = x; var b = boxOf(it); return !S.items.some(function (o) { if (o === it || o.dock || TY[o.type].kind === 'burette') return false; var c = boxOf(o); return b.x0 < c.x1 - 0.2 && c.x0 < b.x1 - 0.2 && b.y0 < c.y1 && c.y0 < b.y1; }); }
+    function free(x) { it.x = x; var b = boxOf(it); if (b.x0 < RACK.x + 3.8 && RACK.x - 3.8 < b.x1) return false; return !S.items.some(function (o) { if (o === it || o.dock || TY[o.type].kind === 'burette') return false; var c = boxOf(o); return b.x0 < c.x1 - 0.2 && c.x0 < b.x1 - 0.2 && b.y0 < c.y1 && c.y0 < b.y1; }); }
     var best = x0;
     for (var d = 0; d <= level.world.w; d += 0.5) { if (x0 + d <= level.world.w - half + 1 && free(x0 + d)) { best = x0 + d; break; } if (x0 - d >= half - 1 && free(x0 - d)) { best = x0 - d; break; } }
     it.x = best;
@@ -826,61 +879,107 @@
     if (!drag || drag.kind !== 'shelf') return;
     var d = drag; drag = null; ghost.classList.remove('show');
     var r = cv.getBoundingClientRect(), inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-    if (!d.moved) { if (TY[d.k].kind === 'ppe') wear(d.k); else toast('把「' + TY[d.k].name + '」拖到實驗台上'); return; }
+    if (!d.moved) { if (TY[d.k].kind === 'ppe') wear(d.k); else addFromShelf(d.k, P(level.world.w * 0.6, 0), true); return; }   // 點一下＝放到桌上空位（不自動架到別的器材上）
     if (!inside) return;
     var p = s2w(e.clientX - r.left, e.clientY - r.top);
     addFromShelf(d.k, p);
   });
-  shelfEl.addEventListener('keydown', function (e) { if (e.key !== 'Enter' && e.key !== ' ') return; var t = e.target.closest('.tile'); if (!t) return; e.preventDefault(); var k = t.getAttribute('data-k'); if (shelfLeft(k) <= 0) { toast(TY[k].name + '已經在用了'); return; } if (TY[k].kind === 'ppe') wear(k); else addFromShelf(k, P(level.world.w * 0.6, 0)); });
+  shelfEl.addEventListener('keydown', function (e) { if (e.key !== 'Enter' && e.key !== ' ') return; var t = e.target.closest('.tile'); if (!t) return; e.preventDefault(); var k = t.getAttribute('data-k'); if (shelfLeft(k) <= 0) { toast(TY[k].name + '已經在用了'); return; } if (TY[k].kind === 'ppe') wear(k); else addFromShelf(k, P(level.world.w * 0.6, 0), true); });
   function wear(k) { if (S.ppe[k]) return; S.ppe[k] = true; sfx('item_place'); toast('戴上' + TY[k].name); logStep('戴上' + TY[k].name); renderPPE(); buildShelf(); }
-  function addFromShelf(k, p) {
+  function addFromShelf(k, p, tapOnly) {
     if (TY[k].kind === 'ppe') return wear(k);
     var it = newItem(k, p.x, Math.max(0, p.y)); it.fromShelf = true;
     if (TRAPS.indexOf(k) >= 0) S.traps[k] = true;
     if (k === 'lamp') toast('這個實驗不需要加熱');
     if (k === 'naoh') toast('題目要配的是鹽酸喔');
     if (k === 'sugarjar') toast('這罐是砂糖');
-    S.items.push(it); place(it, { noPour: true }); select(it); buildShelf();
+    S.items.push(it); if (tapOnly) toBench(it); else place(it, { noPour: true }); select(it); buildShelf();
   }
 
   // ---------- 工具列 ----------
   function btn(label, act, cls) { return '<button type="button" data-act="' + act + '"' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</button>'; }
   function infoOf(it) {
     var k = TY[it.type].kind;
+    if (k === 'cont' && it.dock && it.dock.mode === 'pour') { var tgt = byUid(it.dock.to); return nameOf(it) + ' → ' + nameOf(tgt) + '：已倒 ' + (it._shown || 0).toFixed((it._shown || 0) < 10 ? 2 : 1) + ' mL'; }
+    if (k === 'washer' && it.dock) return '洗瓶 → ' + nameOf(byUid(it.dock.to)) + '：已擠 ' + (it._shown || 0).toFixed(2) + ' mL';
     if (k === 'cont') { var s = it.sol, h = nameOf(it); if (!TY[it.type].src) { h += '・' + (TY[it.type].measure ? '讀放大鏡' : approx(s.v)); if (s.solid > 0.005) h += '・未溶 ' + f2(s.solid) + ' g'; } if (it.props.stopper) h += '・有瓶塞'; return h; }
-    if (k === 'pipette') return '吸量管・管內 ' + (it.sol.v > 0 ? '有液體' : '空的') + '（讀放大鏡）';
-    if (k === 'spatula') return '藥匙' + (it.props.g > 0.01 ? '・上面有' + (it.props.solid === 'sugar' ? '糖' : '食鹽') : '・空的');
+    if (k === 'pipette') return '吸量管・管內 ' + it.sol.v.toFixed(2) + ' mL';
+    if (k === 'spatula') { if (it.dock && TY[byUid(it.dock.to).type].kind === 'jar') return '一匙挖 ' + f1(S.spAmt) + ' g'; return '藥匙' + (it.props.g > 0.01 ? '・約 ' + f1(it.props.g) + ' g ' + (it.props.solid === 'sugar' ? '糖' : '食鹽') : '・空的'); }
     if (k === 'paper') return '稱量紙';
     if (k === 'burette') { var u = underBurette(), col = ''; if (u) { var pk = CM.phpPink(CM.pH(u.sol), u.sol.php); col = '・錐形瓶 ' + (pk <= 0 ? (u.flash > 0.2 ? '滴下處閃粉紅' : '無色') : pk < 0.5 ? '淡粉紅' : '粉紅'); } return '滴定管・活栓 ' + Math.round(it.props.open * 100) + '%' + col; }
     if (k === 'balance') return '電子秤';
     return TY[it.type].name;
   }
+  // 這個器材可以對哪些容器操作（按鈕會列出來）
+  function targetsOf(it) {
+    var k = TY[it.type].kind;
+    return S.items.filter(function (t) {
+      if (t === it || (t.dock && t.dock.mode === 'pour')) return false;
+      if (k === 'spatula') return TY[t.type].kind === 'jar' || TY[t.type].kind === 'paper' || (isCont(t) && !TY[t.type].src);
+      if (k === 'pipette') return isCont(t);
+      if (k === 'stopper') return t.type === 'vol100' && !t.props.stopper;
+      return isCont(t) && !TY[t.type].src;
+    });
+  }
+  var VERB = { cont: '倒進', paper: '倒進', pipette: '伸進', rod: '攪拌', spatula: '放到', washer: '擠到', dropbottle: '滴進', stopper: '蓋上' };
+  function goTo(it, t) {   // 按鈕版的「拖過去放手」
+    var k = TY[it.type].kind; undock(it); it._rack = false;
+    if (k === 'cont' || k === 'paper') { dockPour(it, t); return; }
+    if (k === 'pipette') { if (t.props.reagent === 'concHCl' && level.ppe && (!S.ppe.goggles || (level.ppe === true && !S.ppe.gloves))) return danger('ppe'); it.x = t.x; it.y = t.y + 0.25; it.dock = { mode: 'tip', to: t.uid }; sfx('item_place'); return; }
+    if (k === 'rod') { it.x = t.x; it.y = t.y + 0.3; it.dock = { mode: 'tip', to: t.uid }; t._stir = 4; sfx('stir'); logStep('用玻璃棒攪拌' + nameOf(t)); return; }
+    if (k === 'stopper') { it.dock = { mode: 'stopper', to: t.uid }; t.props.stopper = true; it.x = t.x; it.y = t.y + HH(t); sfx('item_place'); logStep('蓋上瓶塞'); return; }
+    if (k === 'spatula') { var kb = TY[t.type].kind; it.x = t.x; it.y = kb === 'jar' ? t.y + 3 : kb === 'paper' ? t.y + 1.4 : t.y + HH(t) + 0.8; it.dock = { mode: kb === 'jar' ? 'tip' : 'over', to: t.uid }; sfx('item_place'); return; }
+    if (k === 'washer') { var rT = CM.radiusAt(shapeOf(t), 0.2) + 0.15; it.x = t.x + rT + 3.4; it.y = t.y; it.dock = { mode: 'over', to: t.uid, nozzle: P(t.x, t.y + HH(t) + 1.0) }; it._shown = 0; sfx('item_place'); return; }
+    if (k === 'dropbottle') { var busy = S.items.some(function (o) { return o.dock && o.dock.mode === 'tip' && o.dock.to === t.uid; }); it.x = t.x + (busy ? shapeOf(t).mouth * 0.7 : 0); it.y = t.y + HH(t) + 1.0; it.dock = { mode: 'over', to: t.uid }; sfx('item_place'); return; }
+  }
+  function shortName(t) { var n = nameOf(t); var same = S.items.filter(function (o) { return o !== t && nameOf(o) === n; }); return same.length ? n + '（' + (t.x < same[0].x ? '左' : '右') + '）' : n; }
   function buildToolbar() {
     var it = S.sel, mis = $('#mission'); if (!it || S.over) { toolbar.hidden = true; mis.classList.remove('tool'); return; }
     mis.classList.add('tool');
     var k = TY[it.type].kind, h = '<span class="chip">' + infoOf(it) + '</span>';
-    if (it.dock && (it.dock.mode === 'pour' || it.dock.mode === 'over' || it.dock.mode === 'tip' || it.dock.mode === 'pan' || it.dock.mode === 'under') && it.type !== 'stopper') h += btn('放回桌上', 'bench');
+    var benchBtn = it.dock && (it.dock.mode === 'pour' || it.dock.mode === 'over' || it.dock.mode === 'tip' || it.dock.mode === 'pan' || it.dock.mode === 'under') && it.type !== 'stopper' && TY[it.type].kind !== 'dropbottle';
+    if ((k === 'cont') && it.dock && it.dock.mode === 'pour') h += btn('按住倒', 'hold', 'go hold') + btn('倒 0.1', 'pq.1') + btn('倒 1 mL', 'pq1') + btn('倒 10 mL', 'pq10') + btn('全倒', 'pqall');
+    if (k === 'paper' && it.dock && it.dock.mode === 'pour') h += btn('全倒', 'pqall', 'go');
     if (k === 'pipette' && it.dock) h += btn('吸 1 mL', 'p+1') + btn('吸 0.1', 'p+.1') + btn('放 0.1', 'p-.1') + btn('放 1 mL', 'p-1') + btn('全放', 'pall');
-    if (k === 'washer' && it.dock) h += btn('擠一滴', 'w1') + btn('擠 1 mL', 'w10');
+    if (k === 'washer' && it.dock) h += btn('按住擠', 'hold', 'go hold') + btn('擠一滴', 'w1') + btn('擠 1 mL', 'w10') + btn('擠 10 mL', 'w100');
     if (k === 'rod' && it.dock) h += btn('攪拌', 'stir');
-    if (k === 'spatula' && it.dock) { var tk = TY[byUid(it.dock.to).type].kind; if (tk === 'jar') h += btn('挖一匙', 'scoop'); if (tk === 'paper') h += btn('抖一下', 'tap') + btn('全倒', 'dump') + btn('挖回一點', 'back'); }
+    if (k === 'spatula' && it.dock) { var tk = TY[byUid(it.dock.to).type].kind; if (tk === 'jar') h += btn('−1', 'sp-1') + btn('−0.1', 'sp-.1') + btn('+0.1', 'sp+.1') + btn('+1', 'sp+1') + btn('挖起 ' + f1(S.spAmt) + ' g', 'scoop', 'go'); if (tk === 'paper' || tk === 'cont') h += btn('全倒', 'dump', 'go') + btn('抖一點', 'tap') + (tk === 'paper' ? btn('挖回一點', 'back') : ''); }
     if (k === 'balance') h += btn('歸零', 'tare');
     if (k === 'burette') { h += btn('一滴', 'drop') + btn('開大', 'open') + btn('關小', 'close') + btn('關閉', 'shut'); if (underBurette()) h += btn('搖晃錐形瓶', 'swirlU'); }
-    if (k === 'dropbottle' && it.dock) h += btn('滴一滴', 'php');
+    if (k === 'dropbottle' && it.dock) h += btn('滴一滴', 'php', 'go') + btn('放回桌上', 'bench');
     if (it.type === 'vol100' && it.props.stopper) h += btn('倒轉搖勻', 'shake', 'go');
     if (it.type === 'conical' || (it.dock && it.dock.mode === 'under')) h += btn('搖晃', 'swirl');
+    var mover = k === 'spatula' || k === 'pipette' || k === 'rod' || k === 'dropbottle' || k === 'washer';
+    if ((!it.dock || mover || it.dock.mode === 'pan' || it.dock.mode === 'under') && VERB[k] && !(k === 'cont' && it.sol && it.sol.v <= 0.05 && !TY[it.type].src)) targetsOf(it).forEach(function (t) { if (!(it.dock && it.dock.to === t.uid)) h += btn(VERB[k] + ' ' + shortName(t), 'to:' + t.uid, 'to'); });
+    var bur0 = burette(); if (bur0 && k === 'cont' && !TY[it.type].src && !(it.dock && it.dock.mode === 'under') && !underBurette()) h += btn('放到滴定管下', 'under', 'to');
+    var bal0 = balance(); if (bal0 && (k === 'cont' || k === 'paper') && !TY[it.type].src && !(it.dock && it.dock.mode === 'pan') && !S.items.some(function (o) { return o.dock && o.dock.mode === 'pan'; })) h += btn('放到電子秤', 'pan', 'to');
+    if (benchBtn) h += btn('放回桌上', 'bench');
     if (it.fromShelf) h += btn('收回器材櫃', 'del', 'del');
     toolbar.innerHTML = h; toolbar.hidden = false; toolbar.scrollLeft = 0;
   }
+  toolbar.addEventListener('pointerdown', function (e) {
+    var b = e.target.closest('button[data-act="hold"]'); if (!b || !S.sel || S.over || e.button) return;
+    e.preventDefault(); S.sel._holdT = 0; S._holder = S.sel; if (TY[S.sel.type].kind === 'washer') { S.sel._squeeze = true; sfx('pour'); } else S.sel._holdPour = true;
+  });
+  function stopHold() { var h = S._holder; if (!h) return; h._holdPour = false; if (TY[h.type].kind === 'washer') h._squeeze = false; else if (h.dock && h.dock.mode === 'pour') h.tilt = restTilt(h); h._holdT = 0; S._holder = null; endSession(); }
+  window.addEventListener('blur', stopHold);
+  window.addEventListener('pointerup', stopHold); window.addEventListener('pointercancel', stopHold);
   toolbar.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b || !S.sel || S.over) return;
     var it = S.sel, a = b.getAttribute('data-act');
+    if (a.indexOf('to:') === 0) { var tg = byUid(a.slice(3)); if (tg) { goTo(it, tg); if (TY[it.type].kind === 'dropbottle' && it.dock) addDrop(it); } buildToolbar(); buildShelf(); return; }
     if (a === 'bench') { undock(it); toBench(it); }
+    if (a === 'under') { var br0 = burette(); undock(it); it.x = br0.x; it.y = 0; it.dock = { mode: 'under', to: br0.uid }; sfx('item_place'); logStep(nameOf(it) + '放到滴定管下方'); }
+    if (a === 'pan') { var bl = balance(); undock(it); it.x = bl.x; it.y = PAN_Y; it.dock = { mode: 'pan', to: bl.uid }; sfx('item_place'); logStep(nameOf(it) + '放到電子秤上'); }
     if (a === 'p+1') pipetteBy(it, 1); if (a === 'p+.1') pipetteBy(it, 0.1); if (a === 'p-.1') pipetteBy(it, -0.1); if (a === 'p-1') pipetteBy(it, -1); if (a === 'pall') pipetteBy(it, -it.sol.v);
     if (a === 'p+1' || a === 'p+.1' || a === 'p-.1' || a === 'p-1' || a === 'pall') { endSession(); sfx('slider_tick'); }
+    if (a === 'pq.1' || a === 'pq1' || a === 'pq10') it._pourLeft = (it._pourLeft || 0) + { 'pq.1': 0.1, 'pq1': 1, 'pq10': 10 }[a];
+    if (a === 'pqall') { if (TY[it.type].kind === 'paper') it._dumpAll = true; else it._pourLeft = 1e6; }
+    if (a === 'w100') it._washLeft = (it._washLeft || 0) + 10;
     if (a === 'w1' || a === 'w10') { move(it, byUid(it.dock.to), a === 'w1' ? 0.05 : 1, 'wash'); endSession(); sfx('slider_tick'); }
     if (a === 'stir') { var c = byUid(it.dock.to); c._stir = 4; sfx('stir'); logStep('用玻璃棒攪拌' + nameOf(c)); }
-    if (a === 'scoop') { var jar = byUid(it.dock.to); it.props.g = Math.round((0.8 + Math.random() * 0.4) * 100) / 100; it.props.solid = TY[jar.type].solid; sfx('item_pick'); toast('挖起一匙' + (it.props.solid === 'sugar' ? '糖' : '食鹽') + '，拖到稱量紙上方'); }
+    if (a === 'scoop') { var jar = byUid(it.dock.to); it.props.g = Math.round(S.spAmt * (0.96 + Math.random() * 0.08) * 100) / 100; it.props.solid = TY[jar.type].solid; sfx('item_pick'); toast('挖起約 ' + f1(S.spAmt) + ' g' + (it.props.solid === 'sugar' ? '糖' : '食鹽') + '，按「放到 稱量紙」或「放到 燒杯」'); }
+    if (a === 'sp+1' || a === 'sp-1' || a === 'sp+.1' || a === 'sp-.1') { S.spAmt = clamp(Math.round((S.spAmt + { 'sp+1': 1, 'sp-1': -1, 'sp+.1': 0.1, 'sp-.1': -0.1 }[a]) * 10) / 10, 0.1, 20); sfx('slider_tick'); }
     if (a === 'tap' || a === 'dump' || a === 'back') { var pp = byUid(it.dock.to); spatulaTo(it, pp, a); }
     if (a === 'tare') { it.props.tare += balReading(it); sfx('ui_tap'); logStep('電子秤歸零'); }
     if (a === 'drop') oneDrop(it);
@@ -895,6 +994,12 @@
     buildToolbar(); buildShelf();
   });
   function spatulaTo(sp, paper, how) {
+    if (isCont(paper)) {   // 直接倒進容器
+      if (sp.props.g <= 0.005) { toast('藥匙是空的，先到罐子裡挖一匙'); return; }
+      var gc = how === 'dump' ? sp.props.g : Math.min(sp.props.g, Math.round((0.1 + Math.random() * 0.2) * 100) / 100);
+      sp.props.g -= gc; paper.sol.solid += gc; paper.sol.solidKind = sp.props.solid; if (sp.props.solid === 'sugar') paper.sol.sugar = true;
+      sfx('slider_tick'); logStep('藥匙上的' + (sp.props.solid === 'sugar' ? '糖' : '食鹽') + '倒進' + nameOf(paper)); return;
+    }
     if (how === 'back') { var g0 = Math.min(paper.props.g, Math.round((0.1 + Math.random() * 0.2) * 100) / 100); /* 跟「抖一下」一樣一次一點點 */ paper.props.g -= g0; sp.props.g += g0; sp.props.solid = paper.props.solid; sfx('item_pick'); return; }
     if (sp.props.g <= 0.005) { toast('藥匙是空的，先到罐子裡挖一匙'); return; }
     var g = how === 'dump' ? sp.props.g : Math.min(sp.props.g, Math.round((0.1 + Math.random() * 0.2) * 100) / 100);
@@ -905,21 +1010,21 @@
   // ---------- 交卷 ----------
   var sub = $('#submit');
   function buildSubmit() {
-    if (no === 3) sub.innerHTML = '<label for="ans">答案</label><input id="ans" inputmode="decimal" autocomplete="off" placeholder="0.000"><span>mol/L</span><button type="button" id="btnSubmit" class="go">交給老師</button>';
-    else sub.innerHTML = '<button type="button" id="btnSubmit" class="go">交給老師</button>';
+    if (no === 3) sub.innerHTML = '<label for="ans">答案</label><input id="ans" inputmode="decimal" autocomplete="off" placeholder="0.000"><span>mol/L</span><button type="button" id="btnSubmit" class="go">交件</button>';
+    else sub.innerHTML = '<button type="button" id="btnSubmit" class="go">交件</button>';
     $('#btnSubmit').addEventListener('click', evaluate);
   }
   function evaluate() {
     if (S.over) return;
     endSession();
     var res = no === 1 ? evalSalt() : no === 2 ? evalDilution() : evalTitration();
-    if (!res.ok) { sfx('miss'); openSheet('<h2>還沒過關</h2><p>' + res.msg + '</p><div class="row"><button type="button" id="keep">繼續做</button><a class="go" href="chem.html?lv=' + no + '">重來</a></div>'); $('#keep').addEventListener('click', function () { $('#ov').classList.remove('show'); }); return; }
+    if (!res.ok) { sfx('miss'); openSheet('<h2>還沒過關</h2><p>' + res.msg + '</p>' + (level.fail ? '<div class="learn"><b>線索</b><br>' + level.fail + '</div>' : '') + '<div class="row"><button type="button" id="keep">繼續做</button><a class="go" href="chem.html?lv=' + no + '">重來</a></div>'); $('#keep').addEventListener('click', function () { $('#ov').classList.remove('show'); }); return; }
     S.over = true;
     var stars = res.stars.filter(Boolean).length;
     if (window.LabRecords) window.LabRecords.onPass(level.id, stars);
     sfx('pass'); for (var k = 1; k <= stars; k++) sfx('star' + k, 1.15 + 0.34 * (k - 1));
     openSheet('<div class="stars">' + [0, 1, 2].map(function (i) { return '<span' + (res.stars[i] ? '' : ' class="off"') + '>★</span>'; }).join('') + '</div><h2>過關！</h2><ul>' + level.stars.map(function (s, i) { return '<li>' + (res.stars[i] ? '✓ ' : '✗ ') + s + '</li>'; }).join('') + '</ul>' +
-      '<div class="learn">' + res.msg + '</div><div class="learn"><b>背後的科學</b><br>' + level.learn + '</div>' +
+      (level.win ? '<p class="say">' + level.win + '</p>' : '') + '<div class="learn">' + res.msg + '</div><div class="learn"><b>背後的科學</b><br>' + level.learn + '</div>' + (level.bonus ? '<div class="learn bonus"><b>延伸挑戰</b><br>' + level.bonus + '</div>' : '') +
       '<div class="row"><a href="chem.html?lv=' + no + '">再玩一次</a>' + (no < LV.length ? '<a class="go" href="chem.html?lv=' + (no + 1) + '">下一關</a>' : '<a class="go" href="index.html">關卡列表</a>') + '</div>');
   }
   function evalSalt() {
@@ -960,6 +1065,14 @@
     if (err > 2) return { ok: false, msg: msg + '要在 ±2% 以內。檢查讀數（0 在上面）和公式 C = 0.100 × V ÷ 20.00。' };
     return { ok: true, msg: msg, stars: [true, over <= 0.10, S.sampleBy === 'pipette' && !Object.keys(S.traps).length] };
   }
+  // 委託單（每關開場的情境）：只放程式內建的關卡文字
+  function briefHtml() {
+    return '<div class="brief"><span class="tag">新委託</span><h2>' + level.title + '</h2><p class="topic">' + level.stage + (level.topic ? '・' + level.topic : '') + '</p>' +
+      '<ul class="story">' + (level.story || []).map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>' +
+      '<div class="goal"><b>任務</b>' + level.mission + '</div>' +
+      '<div class="row"><a href="index.html">換一個委託</a><button type="button" class="go" id="accept">接下委託</button></div></div>';
+  }
+  function showBrief() { openSheet(briefHtml()); var ac = $('#accept'); if (ac) { ac.focus(); ac.addEventListener('click', function () { $('#ov').classList.remove('show'); sfx('ui_tap'); }); } }
   function openSheet(h) { $('#sheet').className = 'sheet'; $('#sheet').innerHTML = h; $('#ov').classList.remove('danger'); $('#ov').classList.add('show'); }
 
   // ---------- 主迴圈 ----------
@@ -985,8 +1098,8 @@
   if (window.LabSfx) { showSfx(window.LabSfx.isMuted()); window.LabSfx.onChange(showSfx); sb.addEventListener('click', function () { window.LabSfx.setMuted(!window.LabSfx.isMuted()); sfx('ui_tap'); }); } else sb.hidden = true;
   if (window.LabRecords) window.LabRecords.markPlay();
   if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap); else window.addEventListener('resize', resize);
-  resize(); buildShelf(); buildSubmit(); renderPPE(); renderData();
-  toast('提示：容器拖到另一個容器的瓶口上方放手，會出現藍色「傾倒」圓鈕');
+  resize(); buildShelf(); buildSubmit(); renderPPE(); renderData(); if (level.story) showBrief();
+  toast('提示：點一下器材，上面會出現能做的事（倒進、放到、滴進…）；也可以直接用手拖');
   requestAnimationFrame(loop);
   window.__chem = { S: S, level: level, place: place, addFromShelf: addFromShelf, s2w: s2w, w2s: function (p) { setView(mainView()); return w2s(p); }, step: step, move: move, pipetteBy: pipetteBy, byUid: byUid, evaluate: evaluate, wear: wear, pourKnob: pourKnob };
 })();

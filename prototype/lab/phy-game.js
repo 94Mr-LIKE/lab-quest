@@ -110,9 +110,15 @@
       if (zs.length && !zs.some(function (z) { return it.x >= z.x0 && it.x <= z.x1 && (it.slideY || (it.y >= z.y0 && it.y <= z.y1)); })) return false;
     }
     if (it.type === 'dropper') return true;
+    if (it.type === 'cannon' && it.y < 1.9) return false;
     var mine = polysOf(it), others = STATIC_POLYS.slice();
     S.items.forEach(function (o) { if (o !== it && o.type !== 'dropper' && o.type !== 'car') others = others.concat(polysOf(o)); });
-    return !mine.some(function (a) { return others.some(function (b) { return M.polyOverlap(a, b, 0.01); }); });
+    if (mine.some(function (a) { return others.some(function (b) { return M.polyOverlap(a, b, 0.01); }); })) return false;
+    if ((it.type === 'launcher' || it.type === 'cannon') && it.props.ball) {
+      var rb = M.BALLS[it.props.ball].r, mz = M.TYPES[it.type].muzzle(it, rb);
+      if (others.some(function (b) { return nearPoly(mz, b, rb + 0.05); })) return false;
+    }
+    return true;
   }
 
   // ---------- 畫面座標 ----------
@@ -333,8 +339,11 @@
     if (T && T.resize) return { x0: -it.len / 2 - 0.06, y0: -T.thick / 2 - 0.08, x1: it.len / 2 + 0.06, y1: T.thick / 2 + 0.08 };
     return null;
   }
+  function isAimer(it) { return it.type === 'launcher' || it.type === 'cannon'; }
+  function muzzleLocal(it) { return it.type === 'launcher' ? M.TYPES.launcher.barrel : 0; }
   function rotHandle(it) {
     var b = localBox(it); if (!b || !canRotate(it)) return null;
+    if (isAimer(it)) return M.xf(it, V(muzzleLocal(it) + Math.max(0.75, px(46)), 0));   // 瞄準鈕：砲口正前方
     return M.xf(it, V((b.x0 + b.x1) / 2, b.y1 + Math.max(0.5, px(34))));
   }
   function canRotate(it) { var T = M.TYPES[it.type]; return T && T.rot && !it.lockRot; }
@@ -354,8 +363,9 @@
     ctx.restore();
     var rh = rotHandle(it);
     if (rh) {
-      var top = M.xf(it, V((b.x0 + b.x1) / 2, b.y1));
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = px(2); ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(rh.x, rh.y); ctx.stroke();
+      var top = isAimer(it) ? M.xf(it, V(muzzleLocal(it), 0)) : M.xf(it, V((b.x0 + b.x1) / 2, b.y1));
+      if (isAimer(it)) ctx.setLineDash([px(5), px(4)]);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = px(2); ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(rh.x, rh.y); ctx.stroke(); ctx.setLineDash([]);
       var R = Math.max(0.17, px(15));
       ctx.fillStyle = '#ff6a55'; ctx.strokeStyle = '#0b1528'; ctx.lineWidth = px(2); ctx.beginPath(); ctx.arc(rh.x, rh.y, R, 0, 7); ctx.fill(); ctx.stroke();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = px(2); ctx.beginPath(); ctx.arc(rh.x, rh.y, R * 0.55, 0.5, 5.2); ctx.stroke();
@@ -451,8 +461,8 @@
   }
   function partAt(it, p) {
     var tol = Math.max(0.28, px(24));
-    if (it.type === 'launcher' && dist(p, M.xf(it, V(-0.25 - (it.props.x || 0) / 10, 0))) < tol) return 'plunger';
-    if (it.type === 'tlaunch' && dist(p, V(it.x - 1.3 - (it.props.x || 0) / 10, it.y + 0.25)) < tol) return 'plunger';
+    if (it.type === 'launcher') { var lp = M.toLocal(it, p), c0 = (it.props.x || 0) / 10; if (dist(p, M.xf(it, V(-0.25 - c0, 0))) < tol || (lp.x > -0.45 - c0 && lp.x < 0.55 && Math.abs(lp.y) < 0.42)) return 'plunger'; }
+    if (it.type === 'tlaunch') { var c1 = (it.props.x || 0) / 10; if (dist(p, V(it.x - 1.3 - c1, it.y + 0.25)) < tol || (p.x > it.x - 1.55 - c1 && p.x < it.x && p.y > it.y - 0.3 && p.y < it.y + 0.9)) return 'plunger'; }
     if (it.type === 'seesaw' && dist(p, V(it.x, it.y)) < tol) return 'pivot';
     if (it.type === 'dropper' && dist(p, V(it.x, it.y - it.props.h)) < tol) return 'hook';
     return null;
@@ -473,14 +483,14 @@
     try { cv.setPointerCapture(e.pointerId); } catch (err) { /* 合成事件 */ }
     if (ptrs.size === 2) { var a = Array.from(ptrs.values()); drag = { kind: 'pinch', d0: dist(a[0], a[1]), s0: cam.s, c: { x: (a[0].x + a[1].x) / 2, y: (a[0].y + a[1].y) / 2 }, w: s2w((a[0].x + a[1].x) / 2, (a[0].y + a[1].y) / 2) }; return; }
     var p = s2w(sp.x, sp.y);
-    if (S.mode !== 'build') { drag = { kind: 'pan', sx: sp.x, sy: sp.y, cx: cam.x, cy: cam.y }; return; }
+    if (S.mode !== 'build') { drag = { kind: 'pan', sx: sp.x, sy: sp.y, cx: cam.x, cy: cam.y, tap: true, skip: true }; return; }
     var h = handleAt(p), it = S.sel;
     if (h && h.kind === 'rotate') { var c0 = rotCenter(it); drag = { kind: 'rotate', it: it, off: Math.atan2(p.y - c0.y, p.x - c0.x) - it.ang, a0: it.ang }; return; }
     if (h && h.kind === 'resize') { drag = { kind: 'resize', it: it, end: h.end, fixedEnd: M.xf(it, V(-h.end * it.len / 2, 0)), save: { x: it.x, y: it.y, len: it.len } }; return; }
     var hit = hitItem(p);
     if (hit) {
       it = hit.it; select(it);
-      if (hit.part === 'plunger') drag = { kind: 'plunger', it: it, moved: false, x0: it.props.x || 0 };
+      if (hit.part === 'plunger') drag = { kind: 'plunger', it: it, moved: false, x0: it.props.x || 0, p0: p };
       else if (hit.part === 'pivot') drag = { kind: 'pivot', it: it, px0: p.x, arm0: it.props.arm, x0: it.x };
       else if (hit.part === 'hook') drag = { kind: 'hook', it: it };
       else if (!it.lockMove) drag = { kind: 'move', it: it, dx: it.x - p.x, dy: it.y - p.y, ox: it.x, oy: it.y, moved: false };
@@ -532,8 +542,9 @@
       it._bad = !valid(it); buildToolbar(); return;
     }
     if (drag.kind === 'plunger') {
+      if (!drag.moved && dist(p, drag.p0) < Math.max(0.1, px(8))) return;
       var maxX = it.type === 'tlaunch' ? TRACK.maxX : M.TYPES.launcher.maxX, comp;
-      if (it.type === 'tlaunch') comp = (it.x - 1.3 - p.x) * 10; else comp = (-0.25 - M.toLocal(it, p).x) * 10;
+      if (it.type === 'tlaunch') comp = drag.x0 + (drag.p0.x - p.x) * 10; else comp = drag.x0 + (M.toLocal(it, drag.p0).x - M.toLocal(it, p).x) * 10;
       comp = Math.round(clamp(comp, 0, maxX) * 10) / 10;
       if (comp !== it.props.x) { it.props.x = comp; drag.moved = true; tick(); buildToolbar(); }
       return;
@@ -554,13 +565,15 @@
     if (!drag) return;
     var d = drag, it = d.it; drag = null;
     if (d.kind === 'move') {
-      if (it._bad) { it.x = d.ox; it.y = d.oy; it._bad = false; toast('這裡不能放（要放在虛線區內、不能跟別的東西重疊）'); sfx('warn'); }
+      if (it._bad) { var low = it.type === 'cannon' && it.y < 1.9; it.x = d.ox; it.y = d.oy; it._bad = false; toast(low ? '空氣砲的砲口要離桌面 19 cm 以上，砲管才轉得動' : '這裡不能放：會跟別的東西重疊，或砲口被擋住'); sfx('warn'); }
       else if (d.moved) sfx('item_place');
       if (it.type === 'car') sortCars();
     } else if (d.kind === 'rotate' || d.kind === 'resize' || d.kind === 'pivot') {
       if (it._bad) { if (d.kind === 'rotate') it.ang = d.a0; if (d.kind === 'resize') { it.x = d.save.x; it.y = d.save.y; it.len = d.save.len; } if (d.kind === 'pivot') { it.props.arm = d.arm0; it.x = d.x0; } it._bad = false; toast('會跟別的東西重疊，已經改回來'); sfx('warn'); }
     } else if (d.kind === 'plunger') {
       if (d.moved && it.props.x >= 0.3) fire(it);
+    } else if (d.kind === 'pan' && d.skip && d.tap && S.mode === 'run' && S.run && !S.passed) {
+      if (S.run.tr && !S.run.tr.hit) S.run.tr.done = true; else if (S.run.track) S.run.t = 99;   // 點一下：結束這一發
     }
     buildToolbar();
   }
@@ -647,7 +660,7 @@
       if (!target) { toast('先把翹翹板擺到桌上，再把球放上去'); sfx('warn'); return; }
       loadInto(target, k); return;
     }
-    toast('把「' + info.name + '」拖到實驗台的虛線區');
+    toast('把「' + info.name + '」拖到實驗台上');
   }
   function placeNew(k, p) {
     var info = SHELF[k], it;
@@ -657,7 +670,7 @@
     S.items.push(it);
     if (!valid(it)) {
       S.items.pop();
-      toast(info.kind === 'car' ? '滑車要放在軌道上、發射器和光電閘之間，不能疊在一起' : '要放在虛線區內、不能跟別的東西重疊'); sfx('warn'); return;
+      toast(info.kind === 'car' ? '滑車要放在軌道上、發射器和光電閘之間，不能疊在一起' : '這裡不能放：會跟別的東西重疊'); sfx('warn'); return;
     }
     if (info.kind === 'car') sortCars();
     sfx('item_place'); select(it); buildShelf();
@@ -677,7 +690,7 @@
   function info(it) {
     var deg = (it.ang / D2R).toFixed(it.type === 'cannon' ? 1 : 0);
     if (it.type === 'launcher') return '仰角 ' + deg + '°・壓縮 ' + f1(it.props.x || 0) + ' cm・' + (it.props.ball ? M.BALLS[it.props.ball].name : '沒裝球');
-    if (it.type === 'cannon') return '仰角 ' + deg + '°・' + it.props.v.toFixed(2) + ' m/s';
+    if (it.type === 'cannon') { var cup = (level.cups || [])[0], dd = cup ? '｜杯口：水平 ' + f1((cup.x - it.x) * 10) + '、高 ' + f1((cup.y + cup.h - it.y) * 10) + ' cm' : ''; return '仰角 ' + deg + '°' + dd; }
     if (it.type === 'seesaw') return '支點：左 ' + f1(it.props.arm * 10) + ' cm、右 ' + f1((M.TYPES.seesaw.len - it.props.arm) * 10) + ' cm';
     if (it.type === 'dropper') return (it.props.ball ? M.BALLS[it.props.ball].name : '沒掛鐵球') + '・夾子在軌道下 ' + f1(it.props.h * 10) + ' cm';
     if (it.type === 'tlaunch') return '壓縮 ' + f1(it.props.x || 0) + ' cm（最多 ' + TRACK.maxX + ' cm）';
@@ -739,7 +752,7 @@
       for (var i = 0; i < 30; i++) env.world.step(1 / 60);
       M.drop(env, gun);
       run.ball = sb; run.kind = ss.props.ball; run.info = { iron: gun.props.ball, h: gun.props.h, dropY: gun.y - gun.props.h, arm: ss.props.arm };
-      run.tr = new M.Tracker(env, sb, { waitLaunch: true }); sfx('ui_tap');
+      run.tr = new M.Tracker(env, sb, { waitLaunch: true, waitT: 1.2, restT: 0.3, maxT: 4 }); sfx('ui_tap');
     }
     S.run = run; S.mode = 'run'; select(null); S.last = null;
   }
@@ -779,6 +792,7 @@
     if (hit) return win(r);
     sfx(r.track ? 'miss' : (r.ball && r.ball.alive ? 'miss' : 'warn'), 0.05);
     if (S.shots <= 0) setTimeout(lose, 700);
+    else if (level.fail && S.shot % 3 === 0) toast('線索：' + level.fail);   // 每失敗 3 次，搭檔給一次線索（不給答案）
     else toast('沒成功，還剩 ' + S.shots + ' 次。看看數據再調整。');
   }
   function showData(r, hit) {
@@ -799,11 +813,9 @@
   }
   function fmtM(m) { return m >= 1 ? m + ' kg' : Math.round(m * 1000) + ' g'; }
   function starList(r) {
-    var used = S.items.filter(function (i) { return !i.fixed && (i.type === 'plank' || i.type === 'bumper' || i.type === 'sponge'); }).length;
-    if (no === 2) return [true, S.shot <= 2, used <= 1];
-    if (no === 4) return [true, true, S.shot === 1];
-    if (no === 5) return [true, S.shot <= 2, (r.gateV || 0) >= 1.30];
-    return [true, S.shot <= 2, S.shot === 1];
+    if (no === 4) return [true, S.shot <= 3, S.shot === 1];
+    if (no === 5) return [true, S.shot <= 5, (r.gateV || 0) >= 1.30];
+    return [true, S.shot <= 5, S.shot <= 2];
   }
   function win(r) {
     S.passed = true;
@@ -813,17 +825,25 @@
     setTimeout(function () {
       sfx('pass'); for (var k = 1; k <= stars; k++) sfx('star' + k, 1.15 + 0.34 * (k - 1));
       var sh = '<div class="stars">' + [0, 1, 2].map(function (i) { return '<span' + (got[i] ? '' : ' class="off"') + '>★</span>'; }).join('') + '</div>' +
-        '<h2>過關！</h2><ul>' + level.stars.map(function (s, i) { return '<li>' + (got[i] ? '✓ ' : '✗ ') + s + '</li>'; }).join('') + '</ul>' +
-        '<div class="learn">' + dataBox.innerHTML + '</div><div class="learn"><b>背後的科學</b><br>' + level.learn + '</div>' +
+        '<h2>過關！</h2>' + (level.win ? '<p class="say">' + level.win + '</p>' : '') + '<ul>' + level.stars.map(function (s, i) { return '<li>' + (got[i] ? '✓ ' : '✗ ') + s + '</li>'; }).join('') + '</ul>' +
+        '<div class="learn">' + dataBox.innerHTML + '</div><div class="learn"><b>背後的科學</b><br>' + level.learn + '</div>' + (level.bonus ? '<div class="learn bonus"><b>延伸挑戰</b><br>' + level.bonus + '</div>' : '') +
         '<div class="row"><a href="phy.html?lv=' + no + '">再玩一次</a>' + (no < LV.length ? '<a class="go" href="phy.html?lv=' + (no + 1) + '">下一關</a>' : '<a class="go" href="index.html">關卡列表</a>') + '</div>';
       openSheet(sh);
     }, r.track ? 500 : 1100);
   }
   function lose() {
     sfx('miss');
-    openSheet('<h2>次數用完了</h2><p>' + level.shots + ' 次都沒成功。看看留下來的軌跡和數據，想想該怎麼調，再試一次！</p><div class="learn">' + dataBox.innerHTML + '</div>' +
+    openSheet('<h2>次數用完了</h2><p>' + level.shots + ' 次都沒成功。看看留下來的軌跡和數據，想想該怎麼調，再試一次！</p>' + (level.fail ? '<div class="learn"><b>線索</b><br>' + level.fail + '</div>' : '') + '<div class="learn">' + dataBox.innerHTML + '</div>' +
       '<div class="row"><a href="index.html">關卡列表</a><a class="go" href="phy.html?lv=' + no + '">重來</a></div>');
   }
+  // 委託單（每關開場的情境）：只放程式內建的關卡文字
+  function briefHtml() {
+    return '<div class="brief"><span class="tag">新委託</span><h2>' + level.title + '</h2><p class="topic">' + level.stage + (level.topic ? '・' + level.topic : '') + '</p>' +
+      '<ul class="story">' + (level.story || []).map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>' +
+      '<div class="goal"><b>任務</b>' + level.mission + '</div>' +
+      '<div class="row"><a href="index.html">換一個委託</a><button type="button" class="go" id="accept">接下委託</button></div></div>';
+  }
+  function showBrief() { openSheet(briefHtml()); var ac = $('#accept'); if (ac) { ac.focus(); ac.addEventListener('click', function () { $('#ov').classList.remove('show'); sfx('ui_tap'); }); } }
   function openSheet(h) { $('#sheet').innerHTML = h; $('#ov').classList.add('show'); var a = $('#sheet a.go'); if (a) a.focus(); }
   function updateShots() { var h = ''; for (var i = 0; i < level.shots; i++) h += '<i' + (i < level.shots - S.shots ? ' class="used"' : '') + '></i>'; $('#shots').innerHTML = h; $('#shots').setAttribute('aria-label', '剩下 ' + S.shots + ' 次'); }
 
@@ -873,7 +893,7 @@
   if (window.LabSfx) { showSfx(window.LabSfx.isMuted()); window.LabSfx.onChange(showSfx); sb.addEventListener('click', function () { window.LabSfx.setMuted(!window.LabSfx.isMuted()); sfx('ui_tap'); }); } else sb.hidden = true;
   if (window.LabRecords) window.LabRecords.markPlay();
   if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap); else window.addEventListener('resize', resize);
-  resize(); updateShots(); buildShelf();
+  resize(); updateShots(); buildShelf(); if (level.story) showBrief();
   var first = S.items.filter(function (i) { return isGun(i); })[0];
   if (first) select(first);
   toast('提示：點器材會出現選取框和工具列；' + (TRACK ? '先把滑車拖到軌道上' : '拖紅色推桿往後拉、放手就發射'));
