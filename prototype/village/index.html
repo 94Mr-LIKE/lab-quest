@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b2118">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<title>科學復興｜第一章 讓水回到村子</title>
+<link rel="stylesheet" href="village.css">
+</head>
+<body>
+<!-- 路線圖（首頁） -->
+<section id="hub" class="screen">
+  <header class="hub-top">
+    <a class="back" href="../index.html" aria-label="回原型首頁">‹</a>
+    <div>
+      <div class="kicker">科學復興　第一章</div>
+      <h1>讓水回到村子</h1>
+    </div>
+    <button id="soundBtn" class="icon-btn" aria-label="聲音開關">🔊</button>
+  </header>
+  <div class="map">
+    <p id="story" class="story"></p>
+    <div class="goal">路線圖目標：<b>讓水回到村子</b></div>
+    <div id="nodes" class="nodes"></div>
+    <p class="fine">小禾最多只能出 <b>200 N</b> 的力。這不是考試，失敗沒關係：每種失敗都會留下一張「科學筆記」。</p>
+  </div>
+</section>
+
+<!-- 關卡 -->
+<section id="level" class="screen" hidden>
+  <header class="lv-top">
+    <button id="lvBack" class="icon-btn" aria-label="回路線圖">‹</button>
+    <div class="lv-title"><span id="lvNo"></span><b id="lvName"></b></div>
+    <button id="noteBtn" class="chip" aria-label="科學筆記">📒 <span id="noteCount">0/0</span></button>
+    <button id="briefBtn" class="icon-btn" aria-label="任務說明">？</button>
+  </header>
+  <div id="stage" class="stage">
+    <canvas id="cv" aria-label="遊戲畫面"></canvas>
+    <div id="toast" class="toast" hidden></div>
+    <div id="rotateHint" class="rotate-hint" hidden>手機橫放，畫面會更大</div>
+  </div>
+  <footer class="lv-bottom">
+    <div id="tray" class="tray"></div>
+    <div id="nudge" class="nudge" hidden>
+      <button data-d="-1" aria-label="往左移">◀</button>
+      <span id="nudgeLabel"></span>
+      <button data-d="1" aria-label="往右移">▶</button>
+    </div>
+    <button id="holdBtn" class="hold" aria-label="按住出力">按住<br><b>出力</b></button>
+  </footer>
+</section>
+
+<!-- 彈出視窗 -->
+<div id="modal" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div id="modalBody"></div>
+    <div id="modalBtns" class="btns"></div>
+  </div>
+</div>
+<div id="ghost" class="ghost" hidden></div>
+
+<script src="model.js"></script>
+<script src="art/manifest.js"></script>
+<script src="village.js"></script>
+</body>
+</html>
