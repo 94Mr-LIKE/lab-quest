@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0c08">
+<link rel="icon" href="data:,">
+<title>畫質樣本｜高品質 2D</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0f0c08; overflow: hidden; font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+  body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+  #cv { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .hud { position: fixed; left: max(10px, env(safe-area-inset-left)); top: max(8px, env(safe-area-inset-top)); color: #f4ead3; text-shadow: 0 1px 3px #000; pointer-events: none; }
+  .hud b { display: block; font-size: 15px; letter-spacing: .12em; }
+  .hud span { font-size: 12px; opacity: .8; }
+  .btns { position: fixed; right: max(10px, env(safe-area-inset-right)); top: max(8px, env(safe-area-inset-top)); display: flex; gap: 6px; }
+  .btns button { height: 34px; padding: 0 12px; border-radius: 17px; border: 1px solid rgba(244,234,211,.4); background: rgba(15,12,8,.55); color: #f4ead3; font-size: 13px; font-family: inherit; }
+  .btns a { height: 34px; line-height: 34px; padding: 0 12px; border-radius: 17px; border: 1px solid rgba(244,234,211,.4); background: rgba(15,12,8,.55); color: #f4ead3; font-size: 13px; text-decoration: none; }
+  #sub { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); max-width: 86%; padding: 8px 16px; border-radius: 8px; background: rgba(10,8,5,.6); color: #f4ead3; font-size: 16px; line-height: 1.5; text-align: center; opacity: 0; transition: opacity .6s; pointer-events: none; }
+  #sub.on { opacity: 1; }
+  #load { position: fixed; inset: 0; display: grid; place-items: center; color: #f4ead3; font-size: 15px; background: #0f0c08; transition: opacity .8s; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div class="hud"><b>畫質樣本｜高品質 2D</b><span>點地面移動・拖曳看視差</span></div>
+<div class="btns"><button id="fx">特效：開</button><button id="fps">0 fps</button><a href="../../index.html">首頁</a></div>
+<div id="sub"></div>
+<div id="load">載入中…</div>
+<script src="art/manifest.js"></script>
+<script src="hd2d.js"></script>
+</body>
+</html>
