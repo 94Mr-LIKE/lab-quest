@@ -66,7 +66,7 @@ function groundAt(px, pz) {
 // 河中的踏石：頂面高 1 m，跟河岸一樣高，要用跳的過去
 // 河裡的大石頭：都能踩。[x, z, 半徑, 頂面高]
 // 過河那組：岸 → A（走著跳就到）→ B（間隔 1.6 m，要跑起來跳）→ 對岸
-const STONES = [[16.85, 19.3, 0.45, 0.95], [19.4, 19.2, 0.45, 0.95], [16.75, 8.6, 0.5, 0.85], [19.2, 11.6, 0.45, 0.9],
+const STONES = [[16.85, 19.3, 0.45, 0.95], [19.55, 19.2, 0.5, 0.95], [16.75, 8.6, 0.5, 0.85], [19.2, 11.6, 0.45, 0.9],
   [16.8, 12.9, 0.4, 0.8], [18.3, 22.4, 0.5, 0.9], [17.4, 15.2 - 1.6, 0.35, 0.75]].map(([x, z, r, top]) => ({ x, z, r, top }));
 function stoneAt(px, pz) { return STONES.find((s) => Math.hypot(px - s.x, pz - s.z) < s.r) || null; }
 // 腳下可以站的面：踏石 > 地面；河面（沒有踏石）回傳 water
@@ -264,6 +264,7 @@ function buildWheel() {
   const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.7, 12), iron); hub.rotation.x = Math.PI / 2; wheel.add(hub);
   wheel.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   wheel.position.set(21.6, 2 + R - 0.15, 4.5);
+  for (let x = 20; x <= 22; x++) solid.add(x + ",4");                 // 水車擋路
   scene.add(wheel);
   // 支架與水槽
   for (const dz of [-0.45, 0.45]) {
@@ -308,14 +309,15 @@ function buildBridge() {
 }
 
 /* ================= 看板（GPT 畫的 2D 圖，立在 3D 世界裡） ================= */
-const TILT = -0.32;                                           // 往鏡頭傾一點，補俯視造成的壓扁
+// 看板一律直立（往後傾會插進後面的牆），改用拉高 1.2 倍補償鏡頭俯視造成的壓扁
+const TILT = 0, STRETCH = 1.2;
 const planeGeo = new THREE.PlaneGeometry(1, 1).translate(0, 0.5, 0);
 function billboard(k, x, y, z, height, opt = {}) {
   const t = TEX[k], m = MAN[k];
   const mat = new THREE.MeshBasicMaterial({ map: t || null, color: t ? (opt.tint || "#f2ede4") : "#557a3a", alphaTest: 0.45, side: THREE.DoubleSide, fog: true });
   const mesh = new THREE.Mesh(planeGeo, mat);
   const w = m ? height * m.w / m.h : height * 0.8;
-  mesh.scale.set(opt.flip ? -w : w, height, 1);
+  mesh.scale.set(opt.flip ? -w : w, height * (opt.flat ? 1 : STRETCH), 1);
   mesh.position.set(x, y, z); mesh.rotation.x = opt.flat ? 0 : TILT;
   mesh.castShadow = opt.shadow !== false;
   if (t) mesh.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: t, alphaTest: 0.45 });
@@ -456,7 +458,7 @@ function setKidFrame(name) {
   if (!t || !m || !ref) return;
   if (kidMesh.material.map !== t) { kidMesh.material.map = t; kidMesh.material.needsUpdate = true; kidMesh.customDepthMaterial.map = t; kidMesh.customDepthMaterial.needsUpdate = true; }
   const h = KID_H * m.h / ref.h, w = h * m.w / m.h;
-  kidMesh.scale.set(kid.flip ? -w : w, h, 1);
+  kidMesh.scale.set(kid.flip ? -w : w, h * STRETCH, 1);
 }
 
 /* ================= 輸入 ================= */
@@ -519,21 +521,24 @@ function update(dt, t) {
   const spdNow = Math.hypot(kid.vx, kid.vz);
   kid.moving = spdNow > 0.25 && !kid.air;
   // 碰撞：牆、障礙物用「身體寬度」判斷（避免圖卡進牆）；河水只看腳的位置
-  const BX = 0.32, BZN = 0.24, BZS = 0.1;
+  const BX = 0.36, BZN = 0.24, BZS = 0.1;
+  let waterStop = false;
   const ok = (nx, nz) => {
     const ax = nx + Math.sign(nx - kid.x) * BX, az = nz + (nz < kid.z ? -BZN : nz > kid.z ? BZS : 0);
     if (blocked(ax, az) || blocked(nx, nz) || blocked(ax, nz) || blocked(nx, az)) return false;
     const sf = surfaceAt(nx, nz); if (!sf) return false;
     const wallH = Math.max(...[surfaceAt(ax, az), surfaceAt(ax, nz), surfaceAt(nx, az)].map((q) => (q && !q.water ? q.y : -9)));
     if (kid.air) return Math.max(sf.water ? 0 : sf.y, wallH) <= kid.y + 0.05;
-    if (sf.water) return false;                                         // 走路不會自己走進河裡（要跳）
+    if (sf.water) { waterStop = true; return false; }                   // 走路不會自己走進河裡（要跳），但保留速度讓你直接起跳
     if (wallH > Math.max(kid.y, sf.y) + 0.4) return false;              // 前面的牆太高（石階一階 0.25 m 可以上）
     return Math.abs(sf.y - kid.y) < 0.4;
   };
   if (spdNow > 0.01) {
     const dx = kid.vx * dt, dz = kid.vz * dt;
-    if (ok(kid.x + dx, kid.z)) kid.x += dx; else kid.vx = 0;
-    if (ok(kid.x, kid.z + dz)) kid.z += dz; else kid.vz = 0;
+    const ox = kid.x, oz = kid.z;
+    waterStop = false; if (ok(kid.x + dx, kid.z)) kid.x += dx; else if (!waterStop) kid.vx = 0;
+    waterStop = false; if (ok(kid.x, kid.z + dz)) kid.z += dz; else if (!waterStop) kid.vz = 0;
+    if (!kid.air) kid.moving = Math.hypot(kid.x - ox, kid.z - oz) > 0.0005;
     if (len > 0.2 || kid.air) {
       const fx = kid.air ? kid.vx : ix, fz = kid.air ? kid.vz : iz;
       if (Math.abs(fx) > Math.abs(fz) * 0.9) { kid.dir = "side"; kid.flip = fx < 0; } else { kid.dir = fz < 0 ? "up" : "down"; kid.flip = false; }
