@@ -59,12 +59,15 @@ const solid = new Set();                                    // 有障礙物的�
 function groundAt(px, pz) {
   const x = Math.floor(px), z = Math.floor(pz), t = tileAt(x, z);
   if (t == null) return null;
-  if (t === "s" || t === "S") return BASE_H[t] + (1 - (pz - z));
-  if (t === "b") return 1;
+  if (t === "s" || t === "S") return BASE_H[t] + 0.25 * (1 + Math.min(3, Math.floor((1 - (pz - z)) * 4)));  // 跟石階一階一階的高度一致
+  if (t === "b") return 1.02;
   return BASE_H[t];
 }
 // 河中的踏石：頂面高 1 m，跟河岸一樣高，要用跳的過去
-const STONES = [[16.6, 19.3], [17.95, 19.0], [19.3, 19.4]].map(([x, z]) => ({ x, z, r: 0.42, top: 1.0 }));
+// 河裡的大石頭：都能踩。[x, z, 半徑, 頂面高]
+// 過河那組：岸 → A（走著跳就到）→ B（間隔 1.6 m，要跑起來跳）→ 對岸
+const STONES = [[16.85, 19.3, 0.45, 0.95], [19.4, 19.2, 0.45, 0.95], [16.75, 8.6, 0.5, 0.85], [19.2, 11.6, 0.45, 0.9],
+  [16.8, 12.9, 0.4, 0.8], [18.3, 22.4, 0.5, 0.9], [17.4, 15.2 - 1.6, 0.35, 0.75]].map(([x, z, r, top]) => ({ x, z, r, top }));
 function stoneAt(px, pz) { return STONES.find((s) => Math.hypot(px - s.x, pz - s.z) < s.r) || null; }
 // 腳下可以站的面：踏石 > 地面；河面（沒有踏石）回傳 water
 function surfaceAt(px, pz) {
@@ -335,10 +338,24 @@ function buildDeco() {
   for (let z = 9.3; z < 14.5; z += 1.5) { billboard("deco_fence", 15.2, 1, z, 0.8); block(15.2, z); }
   for (let z = 16.5; z < 24; z += 1.5) { if (z > 17.8 && z < 20.6) continue; billboard("deco_fence", 15.2, 1, z, 0.8); block(15.2, z); }
   // 踏石（3D 石柱）
-  const stMat = new THREE.MeshStandardMaterial({ map: tiled("tex_wall"), roughness: 0.9 });
-  STONES.forEach((st) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(st.r, st.r * 1.15, st.top + 0.1, 14), stMat); c.position.set(st.x, (st.top - 0.1) / 2, st.z); c.castShadow = c.receiveShadow = true; scene.add(c); });
+  const rt = tiled("tex_wall").clone(); rt.repeat.set(1.5, 1.5); rt.needsUpdate = true;
+  const stMat = new THREE.MeshStandardMaterial({ map: rt, color: "#b8b4a6", roughness: 0.9, flatShading: true });
+  const mossMat = new THREE.MeshStandardMaterial({ map: tiled("tex_grass"), roughness: 1, flatShading: true });
+  STONES.forEach((st, k) => {
+    // 圓滾的大石頭：二十面體壓扁、表面隨機凹凸，頂面削平好站
+    const g = new THREE.IcosahedronGeometry(1, 2), pa = g.attributes.position;
+    for (let i = 0; i < pa.count; i++) {
+      const x = pa.getX(i), y = pa.getY(i), z = pa.getZ(i), n = 1 + 0.12 * Math.sin(x * 5.1 + k) * Math.cos(z * 4.3 - k) + 0.06 * Math.sin(y * 7 + k * 2);
+      pa.setXYZ(i, x * n, Math.min(y * n, 0.78), z * n);
+    }
+    g.computeVertexNormals();
+    const hgt = st.top + 0.15, c = new THREE.Mesh(g, stMat);
+    c.scale.set(st.r * 1.25, hgt / 1.78, st.r * 1.15); c.position.set(st.x, st.top - 0.78 * hgt / 1.78, st.z);
+    c.rotation.y = k * 1.3; c.castShadow = c.receiveShadow = true; scene.add(c);
+    const moss = new THREE.Mesh(new THREE.CircleGeometry(st.r * 0.8, 12), mossMat); moss.rotation.x = -Math.PI / 2; moss.position.set(st.x, st.top + 0.005, st.z); moss.receiveShadow = true; scene.add(moss);
+  });
   // 河裡的石頭
-  for (const [x, z] of [[16.6, 8], [19.2, 11.5], [17.5, 19], [19.3, 21.5], [16.5, 13.2]]) billboard("deco_rock", x, 0.25, z, 0.8 + r() * 0.3, { flip: r() > 0.5 });
+
   // 植物撒在地面
   const kinds = ["deco_fern", "deco_grass", "deco_flowers", "deco_bush"];
   for (let i = 0; i < 70; i++) {
@@ -415,10 +432,14 @@ function stepSplash(dt) {
 
 /* ================= 主角 ================= */
 const KID_H = 1.55;
-const kid = { x: 5, z: 12.5, y: 1, vy: 0, air: false, dir: "down", flip: false, t: 0, moving: false, safe: { x: 5, z: 12.5 }, sinkT: 0 };
+const kid = { x: 5, z: 12.5, y: 1, vy: 0, vx: 0, vz: 0, run: false, takeoff: 0, air: false, dir: "down", flip: false, t: 0, moving: false, safe: { x: 5, z: 12.5 }, sinkT: 0 };
 // 跳躍：真實的自由落體（g = 9.8 m/s²），起跳速度讓最高點 = 0.6 m（一般人原地跳的高度）
-const G = 9.8, JUMP_H = 0.6, JUMP_V = Math.sqrt(2 * G * JUMP_H);
-function jump() { if (!kid.air && kid.sinkT <= 0) { kid.vy = JUMP_V; kid.air = true; } }
+// 跳躍手感：重力比真實大、起跳快、落下快（按住久跳得高，輕點跳得低）
+const G = 26, JUMP_H = 0.8, JUMP_V = Math.sqrt(2 * G * JUMP_H);
+const WALK = 2.3, RUN = 5.2;                                   // 走路、跑步速度（m/s）
+let jumpBuf = 0, coyote = 0, jumpHeld = false;
+function jump() { jumpBuf = 0.12; jumpHeld = true; }
+function jumpRelease() { jumpHeld = false; if (kid.air && kid.vy > 0) kid.vy *= 0.45; }
 let kidMesh, kidShadow;
 function buildKid() {
   const mat = new THREE.MeshBasicMaterial({ map: TEX.kid_down_idle || null, color: TEX.kid_down_idle ? "#ffffff" : "#d0643a", alphaTest: 0.45, side: THREE.DoubleSide });
@@ -440,11 +461,12 @@ function setKidFrame(name) {
 
 /* ================= 輸入 ================= */
 const keys = {}, joy = { on: false, x: 0, y: 0, ox: 0, oy: 0, id: null };
-addEventListener("keydown", (e) => { keys[e.key.toLowerCase()] = true; if (e.code === "Space") { e.preventDefault(); if (!e.repeat) jump(); } });
-addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
+let lastInput = "touch";
+addEventListener("keydown", (e) => { lastInput = "key"; keys[e.key.toLowerCase()] = true; if (e.code === "Space") { e.preventDefault(); if (!e.repeat) jump(); } });
+addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; if (e.code === "Space") jumpRelease(); });
 const stick = $("stick"), knob = $("knob");
 renderer.domElement.addEventListener("pointerdown", (e) => {
-  joy.on = true; joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = joy.y = 0;
+  lastInput = "touch"; joy.on = true; joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = joy.y = 0;
   stick.style.display = "block"; stick.style.left = e.clientX + "px"; stick.style.top = e.clientY + "px"; knob.style.transform = "";
 });
 addEventListener("pointermove", (e) => {
@@ -457,8 +479,9 @@ const endJoy = (e) => { if (e.pointerId !== joy.id) return; joy.on = false; joy.
 addEventListener("pointerup", endJoy); addEventListener("pointercancel", endJoy);
 let FX = true;
 $("fx").addEventListener("pointerdown", (e) => e.stopPropagation());
-$("jump").addEventListener("pointerdown", (e) => { e.stopPropagation(); e.preventDefault(); jump(); $("jump").classList.add("down"); });
-addEventListener("pointerup", () => $("jump").classList.remove("down"));
+$("jump").addEventListener("pointerdown", (e) => { e.stopPropagation(); e.preventDefault(); lastInput = "touch"; jump(); $("jump").classList.add("down"); });
+const jumpUp = () => { if ($("jump").classList.contains("down")) { $("jump").classList.remove("down"); jumpRelease(); } };
+addEventListener("pointerup", jumpUp); addEventListener("pointercancel", jumpUp);
 $("fx").onclick = () => { FX = !FX; $("fx").textContent = "特效：" + (FX ? "開" : "關"); };
 
 /* ================= 字幕與事件 ================= */
@@ -475,26 +498,54 @@ function events() {
 /* ================= 更新 ================= */
 const clock = { last: performance.now() / 1000, elapsedTime: 0, getDelta() { const n = performance.now() / 1000, d = n - this.last; this.last = n; this.elapsedTime += d; return d; } };
 function update(dt, t) {
-  let vx = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0) + joy.x;
-  let vz = (keys.s || keys.arrowdown ? 1 : 0) - (keys.w || keys.arrowup ? 1 : 0) + joy.y;
-  const len = Math.hypot(vx, vz);
-  kid.moving = len > 0.2 && kid.sinkT <= 0;
-  if (kid.moving) {
-    const sp = 3.4 * Math.min(1, len) / len, dx = vx * sp * dt, dz = vz * sp * dt;
-    const ok = (nx, nz) => {
-      const ax = nx + Math.sign(nx - kid.x) * 0.22, az = nz + Math.sign(nz - kid.z) * 0.18;
-      if (blocked(ax, az) || blocked(nx, nz)) return false;
-      const sf = surfaceAt(nx, nz), sa = surfaceAt(ax, az); if (!sf || !sa) return false;
-      if (kid.air) return Math.max(sf.y, sa.y) <= kid.y + 0.05;         // 空中：比身體低的地方才過得去
-      if (sf.water || sa.water) return false;                           // 走路不會自己走進河裡
-      return Math.abs(sf.y - kid.y) < 0.4;
-    };
-    if (ok(kid.x + dx, kid.z)) kid.x += dx;
-    if (ok(kid.x, kid.z + dz)) kid.z += dz;
-    if (Math.abs(vx) > Math.abs(vz) * 0.9) { kid.dir = "side"; kid.flip = vx < 0; } else { kid.dir = vz < 0 ? "up" : "down"; kid.flip = false; }
-    kid.t += dt;
+  let ix = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0) + joy.x;
+  let iz = (keys.s || keys.arrowdown ? 1 : 0) - (keys.w || keys.arrowup ? 1 : 0) + joy.y;
+  let len = Math.hypot(ix, iz);
+  if (len > 1) { ix /= len; iz /= len; len = 1; }
+  // 跑步：搖桿推到底（超過 75%）或按住 Shift；輕推＝走路
+  const wantRun = keys.shift || (joy.on && len > 0.75);
+  const live = kid.sinkT <= 0;
+  if (!kid.air && live) {
+    kid.run = wantRun && len > 0.2;
+    const spd = len > 0.2 ? (kid.run ? RUN : WALK) : 0, tx = len > 0.2 ? ix / len * spd : 0, tz = len > 0.2 ? iz / len * spd : 0;
+    const k = Math.min(1, dt * 14);                                     // 起步、停下很快，但不是瞬間
+    kid.vx += (tx - kid.vx) * k; kid.vz += (tz - kid.vz) * k;
+  } else if (kid.air && len > 0.2) {                                   // 空中只能微調方向，不能加速
+    const cur = Math.hypot(kid.vx, kid.vz), cap = Math.max(cur, WALK * 0.6);
+    kid.vx += ix * 6 * dt; kid.vz += iz * 6 * dt;
+    const nv = Math.hypot(kid.vx, kid.vz); if (nv > cap) { kid.vx *= cap / nv; kid.vz *= cap / nv; }
+  }
+  if (!live) { kid.vx = kid.vz = 0; }
+  const spdNow = Math.hypot(kid.vx, kid.vz);
+  kid.moving = spdNow > 0.25 && !kid.air;
+  // 碰撞：牆、障礙物用「身體寬度」判斷（避免圖卡進牆）；河水只看腳的位置
+  const BX = 0.32, BZN = 0.24, BZS = 0.1;
+  const ok = (nx, nz) => {
+    const ax = nx + Math.sign(nx - kid.x) * BX, az = nz + (nz < kid.z ? -BZN : nz > kid.z ? BZS : 0);
+    if (blocked(ax, az) || blocked(nx, nz) || blocked(ax, nz) || blocked(nx, az)) return false;
+    const sf = surfaceAt(nx, nz); if (!sf) return false;
+    const wallH = Math.max(...[surfaceAt(ax, az), surfaceAt(ax, nz), surfaceAt(nx, az)].map((q) => (q && !q.water ? q.y : -9)));
+    if (kid.air) return Math.max(sf.water ? 0 : sf.y, wallH) <= kid.y + 0.05;
+    if (sf.water) return false;                                         // 走路不會自己走進河裡（要跳）
+    if (wallH > Math.max(kid.y, sf.y) + 0.4) return false;              // 前面的牆太高（石階一階 0.25 m 可以上）
+    return Math.abs(sf.y - kid.y) < 0.4;
+  };
+  if (spdNow > 0.01) {
+    const dx = kid.vx * dt, dz = kid.vz * dt;
+    if (ok(kid.x + dx, kid.z)) kid.x += dx; else kid.vx = 0;
+    if (ok(kid.x, kid.z + dz)) kid.z += dz; else kid.vz = 0;
+    if (len > 0.2 || kid.air) {
+      const fx = kid.air ? kid.vx : ix, fz = kid.air ? kid.vz : iz;
+      if (Math.abs(fx) > Math.abs(fz) * 0.9) { kid.dir = "side"; kid.flip = fx < 0; } else { kid.dir = fz < 0 ? "up" : "down"; kid.flip = false; }
+    }
+    kid.t += dt * (kid.run ? 1.6 : 1);
   } else kid.t = 0;
   const sf = surfaceAt(kid.x, kid.z) || { y: kid.y, water: false };
+  // 起跳（預先按、剛走出邊緣 0.1 秒內都算）
+  jumpBuf -= dt; coyote = kid.air ? coyote - dt : 0.1;
+  if (jumpBuf > 0 && coyote > 0 && live) {
+    kid.vy = JUMP_V * (jumpHeld ? 1 : 0.7); kid.air = true; jumpBuf = 0; coyote = 0; kid.takeoff = spdNow;
+  }
   if (kid.sinkT > 0) {                                                  // 掉進河裡：沉下去，再回到上一個站穩的位置
     kid.sinkT -= dt; kid.y -= dt * 1.2;
     if (kid.sinkT <= 0) { kid.x = kid.safe.x; kid.z = kid.safe.z; kid.y = surfaceAt(kid.x, kid.z).y; kid.air = false; kid.vy = 0; }
@@ -502,15 +553,20 @@ function update(dt, t) {
     kid.vy -= G * dt; kid.y += kid.vy * dt;
     if (kid.y <= sf.y && kid.vy <= 0) {
       kid.y = sf.y; kid.air = false; kid.vy = 0;
-      if (sf.water) { kid.sinkT = 0.9; splash(kid.x, kid.z); say("撲通！差一點……", 1.6); }
+      if (sf.water) {
+        kid.sinkT = 0.9; splash(kid.x, kid.z);
+        const tip = kid.takeoff < (WALK + RUN) / 2 ? (lastInput === "key" ? "走著跳不夠遠，按住 Shift 跑起來再跳！" : "走著跳不夠遠，把搖桿推到底跑起來再跳！") : "撲通！差一點……";
+        say(tip, 2.6);
+      }
     }
   } else {
-    if (sf.y < kid.y - 0.3) { kid.air = true; kid.vy = 0; }             // 走出邊緣就往下掉
+    if (sf.y < kid.y - 0.3) { kid.air = true; kid.vy = 0; kid.takeoff = spdNow; }   // 走出邊緣就往下掉
     else kid.y += (sf.y - kid.y) * Math.min(1, dt * 14);
     if (!sf.water && !stoneAt(kid.x, kid.z)) kid.safe = { x: kid.x, z: kid.z };
   }
   const seq = ["a", "idle", "b", "idle"];
   setKidFrame("kid_" + kid.dir + "_" + (kid.air ? "a" : kid.moving ? seq[Math.floor(kid.t * 8) % 4] : "idle"));
+  kidMesh.rotation.z = kid.run && kid.moving && kid.dir === "side" ? (kid.flip ? 0.08 : -0.08) : 0;   // 跑步身體前傾
   kidMesh.position.set(kid.x, kid.y + (kid.moving && !kid.air ? Math.abs(Math.sin(kid.t * 12.5)) * 0.03 : 0), kid.z);
   const fl = sf.y, up = Math.max(0, kid.y - fl), ss = 1 / (1 + up * 1.2);
   kidShadow.position.set(kid.x, fl + 0.02, kid.z + 0.05); kidShadow.scale.set(ss, ss, 1); kidShadow.material.opacity = ss;
