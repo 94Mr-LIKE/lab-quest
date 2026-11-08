@@ -63,6 +63,20 @@ function groundAt(px, pz) {
   if (t === "b") return 1;
   return BASE_H[t];
 }
+// 河中的踏石：頂面高 1 m，跟河岸一樣高，要用跳的過去
+const STONES = [[16.6, 19.3], [17.95, 19.0], [19.3, 19.4]].map(([x, z]) => ({ x, z, r: 0.42, top: 1.0 }));
+function stoneAt(px, pz) { return STONES.find((s) => Math.hypot(px - s.x, pz - s.z) < s.r) || null; }
+// 腳下可以站的面：踏石 > 地面；河面（沒有踏石）回傳 water
+function surfaceAt(px, pz) {
+  const st = stoneAt(px, pz); if (st) return { y: st.top, water: false };
+  const t = tileAt(Math.floor(px), Math.floor(pz));
+  if (t === "w") return { y: WATER_Y, water: true };
+  const g = groundAt(px, pz); return g == null ? null : { y: g, water: false };
+}
+function blocked(px, pz) {
+  const x = Math.floor(px), z = Math.floor(pz), t = tileAt(x, z);
+  return t == null || t === "B" || t === "T" || t === "F" || t === "V" || solid.has(x + "," + z);
+}
 function walkable(px, pz) {
   const x = Math.floor(px), z = Math.floor(pz), t = tileAt(x, z);
   if (t == null || t === "w" || t === "B" || t === "T" || t === "F" || t === "V") return false;
@@ -319,7 +333,10 @@ function buildDeco() {
   billboard("deco_vines", 2.4, 2.4, 7.95, 1.6, { flat: true, shadow: false });
   // 左岸
   for (let z = 9.3; z < 14.5; z += 1.5) { billboard("deco_fence", 15.2, 1, z, 0.8); block(15.2, z); }
-  for (let z = 16.5; z < 24; z += 1.5) { billboard("deco_fence", 15.2, 1, z, 0.8); block(15.2, z); }
+  for (let z = 16.5; z < 24; z += 1.5) { if (z > 17.8 && z < 20.6) continue; billboard("deco_fence", 15.2, 1, z, 0.8); block(15.2, z); }
+  // 踏石（3D 石柱）
+  const stMat = new THREE.MeshStandardMaterial({ map: tiled("tex_wall"), roughness: 0.9 });
+  STONES.forEach((st) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(st.r, st.r * 1.15, st.top + 0.1, 14), stMat); c.position.set(st.x, (st.top - 0.1) / 2, st.z); c.castShadow = c.receiveShadow = true; scene.add(c); });
   // 河裡的石頭
   for (const [x, z] of [[16.6, 8], [19.2, 11.5], [17.5, 19], [19.3, 21.5], [16.5, 13.2]]) billboard("deco_rock", x, 0.25, z, 0.8 + r() * 0.3, { flip: r() > 0.5 });
   // 植物撒在地面
@@ -362,6 +379,9 @@ function buildFX() {
   const g2 = new THREE.BufferGeometry(); g2.setAttribute("position", new THREE.BufferAttribute(q, 3));
   flies = new THREE.Points(g2, new THREE.PointsMaterial({ size: 0.16, map: dotTex(), color: "#c8ffb0", transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending }));
   scene.add(flies);
+  const sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.BufferAttribute(new Float32Array(40 * 3), 3));
+  splashPts = new THREE.Points(sg, new THREE.PointsMaterial({ size: 0.14, map: dotTex(), color: "#e8fbff", transparent: true, depthWrite: false }));
+  splashPts.visible = false; scene.add(splashPts);
   // 光束：幾片疊加的漸層板，沿著陽光方向
   const c = document.createElement("canvas"); c.width = 16; c.height = 256; const gg = c.getContext("2d");
   const gr = gg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "rgba(255,220,160,0)"); gr.addColorStop(0.25, "rgba(255,220,160,.9)"); gr.addColorStop(1, "rgba(255,220,160,0)");
@@ -378,9 +398,27 @@ function buildFX() {
   }
 }
 
+/* ---------- 水花 ---------- */
+let splashPts, splashV = [], splashT = 0;
+function splash(x, z) {
+  const n = 40, p = splashPts.geometry.attributes.position;
+  splashV = [];
+  for (let i = 0; i < n; i++) { p.setXYZ(i, x, WATER_Y, z); const a = Math.random() * 6.28, r = 0.6 + Math.random() * 1.6; splashV.push([Math.cos(a) * r, 2 + Math.random() * 2.5, Math.sin(a) * r]); }
+  p.needsUpdate = true; splashT = 1; splashPts.visible = true;
+}
+function stepSplash(dt) {
+  if (!splashPts || splashT <= 0) return;
+  splashT -= dt; const p = splashPts.geometry.attributes.position;
+  for (let i = 0; i < splashV.length; i++) { const v = splashV[i]; v[1] -= 9.8 * dt; p.setXYZ(i, p.getX(i) + v[0] * dt, Math.max(WATER_Y, p.getY(i) + v[1] * dt), p.getZ(i) + v[2] * dt); }
+  p.needsUpdate = true; splashPts.material.opacity = Math.max(0, splashT); if (splashT <= 0) splashPts.visible = false;
+}
+
 /* ================= 主角 ================= */
 const KID_H = 1.55;
-const kid = { x: 5, z: 12.5, y: 1, dir: "down", flip: false, t: 0, moving: false };
+const kid = { x: 5, z: 12.5, y: 1, vy: 0, air: false, dir: "down", flip: false, t: 0, moving: false, safe: { x: 5, z: 12.5 }, sinkT: 0 };
+// 跳躍：真實的自由落體（g = 9.8 m/s²），起跳速度讓最高點 = 0.6 m（一般人原地跳的高度）
+const G = 9.8, JUMP_H = 0.6, JUMP_V = Math.sqrt(2 * G * JUMP_H);
+function jump() { if (!kid.air && kid.sinkT <= 0) { kid.vy = JUMP_V; kid.air = true; } }
 let kidMesh, kidShadow;
 function buildKid() {
   const mat = new THREE.MeshBasicMaterial({ map: TEX.kid_down_idle || null, color: TEX.kid_down_idle ? "#ffffff" : "#d0643a", alphaTest: 0.45, side: THREE.DoubleSide });
@@ -402,7 +440,7 @@ function setKidFrame(name) {
 
 /* ================= 輸入 ================= */
 const keys = {}, joy = { on: false, x: 0, y: 0, ox: 0, oy: 0, id: null };
-addEventListener("keydown", (e) => { keys[e.key.toLowerCase()] = true; });
+addEventListener("keydown", (e) => { keys[e.key.toLowerCase()] = true; if (e.code === "Space") { e.preventDefault(); if (!e.repeat) jump(); } });
 addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
 const stick = $("stick"), knob = $("knob");
 renderer.domElement.addEventListener("pointerdown", (e) => {
@@ -419,6 +457,8 @@ const endJoy = (e) => { if (e.pointerId !== joy.id) return; joy.on = false; joy.
 addEventListener("pointerup", endJoy); addEventListener("pointercancel", endJoy);
 let FX = true;
 $("fx").addEventListener("pointerdown", (e) => e.stopPropagation());
+$("jump").addEventListener("pointerdown", (e) => { e.stopPropagation(); e.preventDefault(); jump(); $("jump").classList.add("down"); });
+addEventListener("pointerup", () => $("jump").classList.remove("down"));
 $("fx").onclick = () => { FX = !FX; $("fx").textContent = "特效：" + (FX ? "開" : "關"); };
 
 /* ================= 字幕與事件 ================= */
@@ -438,25 +478,44 @@ function update(dt, t) {
   let vx = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0) + joy.x;
   let vz = (keys.s || keys.arrowdown ? 1 : 0) - (keys.w || keys.arrowup ? 1 : 0) + joy.y;
   const len = Math.hypot(vx, vz);
-  kid.moving = len > 0.2;
+  kid.moving = len > 0.2 && kid.sinkT <= 0;
   if (kid.moving) {
     const sp = 3.4 * Math.min(1, len) / len, dx = vx * sp * dt, dz = vz * sp * dt;
-    const cur = groundAt(kid.x, kid.z);
     const ok = (nx, nz) => {
       const ax = nx + Math.sign(nx - kid.x) * 0.22, az = nz + Math.sign(nz - kid.z) * 0.18;
-      if (!walkable(ax, az) || !walkable(nx, nz)) return false;
-      const g = groundAt(nx, nz); return g != null && Math.abs(g - cur) < 0.4;
+      if (blocked(ax, az) || blocked(nx, nz)) return false;
+      const sf = surfaceAt(nx, nz), sa = surfaceAt(ax, az); if (!sf || !sa) return false;
+      if (kid.air) return Math.max(sf.y, sa.y) <= kid.y + 0.05;         // 空中：比身體低的地方才過得去
+      if (sf.water || sa.water) return false;                           // 走路不會自己走進河裡
+      return Math.abs(sf.y - kid.y) < 0.4;
     };
     if (ok(kid.x + dx, kid.z)) kid.x += dx;
     if (ok(kid.x, kid.z + dz)) kid.z += dz;
     if (Math.abs(vx) > Math.abs(vz) * 0.9) { kid.dir = "side"; kid.flip = vx < 0; } else { kid.dir = vz < 0 ? "up" : "down"; kid.flip = false; }
     kid.t += dt;
   } else kid.t = 0;
-  const gy = groundAt(kid.x, kid.z) ?? kid.y; kid.y += (gy - kid.y) * Math.min(1, dt * 14);
+  const sf = surfaceAt(kid.x, kid.z) || { y: kid.y, water: false };
+  if (kid.sinkT > 0) {                                                  // 掉進河裡：沉下去，再回到上一個站穩的位置
+    kid.sinkT -= dt; kid.y -= dt * 1.2;
+    if (kid.sinkT <= 0) { kid.x = kid.safe.x; kid.z = kid.safe.z; kid.y = surfaceAt(kid.x, kid.z).y; kid.air = false; kid.vy = 0; }
+  } else if (kid.air) {
+    kid.vy -= G * dt; kid.y += kid.vy * dt;
+    if (kid.y <= sf.y && kid.vy <= 0) {
+      kid.y = sf.y; kid.air = false; kid.vy = 0;
+      if (sf.water) { kid.sinkT = 0.9; splash(kid.x, kid.z); say("撲通！差一點……", 1.6); }
+    }
+  } else {
+    if (sf.y < kid.y - 0.3) { kid.air = true; kid.vy = 0; }             // 走出邊緣就往下掉
+    else kid.y += (sf.y - kid.y) * Math.min(1, dt * 14);
+    if (!sf.water && !stoneAt(kid.x, kid.z)) kid.safe = { x: kid.x, z: kid.z };
+  }
   const seq = ["a", "idle", "b", "idle"];
-  setKidFrame("kid_" + kid.dir + "_" + (kid.moving ? seq[Math.floor(kid.t * 8) % 4] : "idle"));
-  kidMesh.position.set(kid.x, kid.y + (kid.moving ? Math.abs(Math.sin(kid.t * 12.5)) * 0.03 : 0), kid.z);
-  kidShadow.position.set(kid.x, kid.y + 0.02, kid.z + 0.05);
+  setKidFrame("kid_" + kid.dir + "_" + (kid.air ? "a" : kid.moving ? seq[Math.floor(kid.t * 8) % 4] : "idle"));
+  kidMesh.position.set(kid.x, kid.y + (kid.moving && !kid.air ? Math.abs(Math.sin(kid.t * 12.5)) * 0.03 : 0), kid.z);
+  const fl = sf.y, up = Math.max(0, kid.y - fl), ss = 1 / (1 + up * 1.2);
+  kidShadow.position.set(kid.x, fl + 0.02, kid.z + 0.05); kidShadow.scale.set(ss, ss, 1); kidShadow.material.opacity = ss;
+  kidShadow.visible = kid.sinkT <= 0;
+  stepSplash(dt);
   events();
   // 動畫
   waterU.t.value = t;
@@ -518,8 +577,9 @@ let quality = 1.5;
 /* ================= 主迴圈 ================= */
 let fN = 0, fT = 0, lowCount = 0;
 function frame() {
-  const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
-  update(dt, t);
+  const dt = Math.min(0.12, clock.getDelta()), t = clock.elapsedTime;
+  const n = Math.ceil(dt / 0.034);                     // 畫面卡的時候也維持正確的物理（分小步算）
+  for (let i = 0; i < n; i++) update(dt / n, t);
   if (FX) composer.render(); else renderer.render(scene, camera);
   fN++; fT += dt;
   if (fT > 1) {
@@ -536,4 +596,4 @@ loadAll().then(() => {
   say("水車終於轉起來了。可是河對岸的高台上，好像有什麼在發光……", 4);
   requestAnimationFrame(frame);
 });
-window.__hd2 = { kid, setFX: (v) => { FX = v; } };
+window.__hd2 = { kid, jump, setFX: (v) => { FX = v; } };
